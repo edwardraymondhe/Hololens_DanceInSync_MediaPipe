@@ -34,10 +34,10 @@ public class PoseVisuallizer : MonoBehaviour
     }
 
     void LateUpdate(){
-        inputImageUI.texture = webCamInput.inputImageTexture;
+        inputImageUI.texture = webCamInput.InputImageTexture;
 
         // Predict pose by neural network model.
-        detecter.ProcessImage(webCamInput.inputImageTexture);
+        detecter.ProcessImage(webCamInput.InputImageTexture);
 
         // Output landmark values(33 values) and the score whether human pose is visible (1 values).
         for(int i = 0; i < detecter.vertexCount + 1; i++){
