@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Video;
 
 public class WebCamInput : MonoBehaviour
 {
@@ -6,7 +7,7 @@ public class WebCamInput : MonoBehaviour
     public int webCamDeviceIndex = 0;
     public bool useWebCam = true;
 
-    [SerializeField] Vector2 webCamResolution = new Vector2(1920, 1080);
+    public Vector2 webCamResolution = new Vector2(1920, 1080);
     [SerializeField] Texture staticInput;
 
     // Provide input image Texture.
@@ -14,7 +15,11 @@ public class WebCamInput : MonoBehaviour
     {
         get
         {
-            if (!useWebCam && staticInput != null) return staticInput;
+            if (!useWebCam && staticInput != null)
+            {
+                return staticInput;
+            }
+
             return inputRT;
         }
     }
@@ -24,7 +29,7 @@ public class WebCamInput : MonoBehaviour
 
     void Start()
     {
-        // PlayDevice(0);
+        PlayVideo();
     }
 
     void Update()
@@ -48,37 +53,47 @@ public class WebCamInput : MonoBehaviour
         useWebCam = true;
         webCamDevice = WebCamTexture.devices[idx];
         if (webCamDevice.name == "")
-        {
-            Debug.Log("Unreadable web cam: changing to 0");
             webCamDevice = WebCamTexture.devices[0];
-        }
-        Debug.Log(webCamDevice.name);
-        Play();
+
+        ClearTexture();
+
+        var name = webCamDevice.name;
+
+        var resolution = GetResolution();
+
+        inputRT = new RenderTexture((int)resolution.x, (int)resolution.y, 0);
+        webCamTexture = new WebCamTexture(name, (int)resolution.x, (int)resolution.y);
+        webCamTexture.Play();
     }
 
     public void PlayVideo()
     {
         useWebCam = false;
-        Play();
-    }
-
-    private void Play()
-    {
         ClearTexture();
 
         var name = "";
-        if (useWebCam)
-            name = webCamDevice.name;
-        else
-            name = "";
 
-        webCamTexture = new WebCamTexture(name, (int)webCamResolution.x, (int)webCamResolution.y);
+        var videoPlayer = GetComponent<VideoPlayer>();
+        var resolution = GetResolution();
+
+        staticInput = new RenderTexture((int)resolution.x, (int)resolution.y, 0);
+        videoPlayer.targetTexture = (RenderTexture)staticInput;
+        webCamTexture = new WebCamTexture(name, (int)resolution.x, (int)resolution.y);
         webCamTexture.Play();
-
-        inputRT = new RenderTexture((int)webCamResolution.x, (int)webCamResolution.y, 0);
     }
 
-    public void ClearTexture()
+    public Vector2 GetResolution()
+    {
+        if (useWebCam)
+            return webCamResolution;
+        else
+        {
+            var clip = GetComponent<VideoPlayer>().clip;
+            return new Vector2(clip.width, clip.height);
+        }
+    }
+
+    private void ClearTexture()
     {
         if (webCamTexture != null)
         {

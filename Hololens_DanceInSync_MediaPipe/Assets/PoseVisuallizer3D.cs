@@ -35,7 +35,6 @@ public class PoseVisuallizer3D : MonoBehaviour
         new Vector4(24, 26), new Vector4(26, 28), new Vector4(28, 30), new Vector4(30, 32), new Vector4(32, 28)
     };
 
-
     void Start(){
         material = new Material(shader);
         detector = new BlazePoseDetecter();
@@ -62,42 +61,31 @@ public class PoseVisuallizer3D : MonoBehaviour
         This data is (score, 0, 0, 0).
     */
 
-    public void PrintLandmarks()
+    public Helper.Pose.Landmarks GetLandmarks(bool world)
     {
-        // Output landmark values(33 values) and the score whether human pose is visible (1 values).
-        Debug.Log("---");
-        for (int i = 0; i < detector.vertexCount + 1; i++)
-            Debug.LogFormat("{0}: {1}", i, detector.GetPoseWorldLandmark(i));
-        Debug.Log("---");
-    }
-
-    
-    public DataStructures.PoseLandmarks GetLandmarks(bool world)
-    {
-        List<DataStructures.PoseLandmark> landmarks = new List<DataStructures.PoseLandmark>();
+        List<Helper.Pose.Landmark> landmarks = new List<Helper.Pose.Landmark>();
 
         if (world)
             for (int i = 0; i < detector.vertexCount + 1; i++)
-                landmarks.Add(new DataStructures.PoseLandmark(detector.GetPoseWorldLandmark(i)));
+                landmarks.Add(new Helper.Pose.Landmark(detector.GetPoseWorldLandmark(i)));
         else
             for (int i = 0; i < detector.vertexCount + 1; i++)
-                landmarks.Add(new DataStructures.PoseLandmark(detector.GetPoseLandmark(i)));
+                landmarks.Add(new Helper.Pose.Landmark(detector.GetPoseLandmark(i)));
 
-        DataStructures.PoseLandmarks poseLandmarks = new DataStructures.PoseLandmarks(landmarks);
+        Helper.Pose.Landmarks PoseLandmarks = new Helper.Pose.Landmarks(landmarks);
 
-        return poseLandmarks;
+        return PoseLandmarks;
     }
 
     void LateUpdate(){
         if (webCamInput.InputImageTexture != null)
             ProcessImage(webCamInput.InputImageTexture);
-        // PrintLandmarks();
-
     }
 
     void OnRenderObject(){
         // Use predicted pose world landmark results on the ComputeBuffer (GPU) memory.
         material.SetBuffer("_worldVertices", detector.worldLandmarkBuffer);
+        
         // Set pose landmark counts.
         material.SetInt("_keypointCount", detector.vertexCount);
         material.SetFloat("_humanExistThreshold", humanExistThreshold);
@@ -139,8 +127,4 @@ public class PoseVisuallizer3D : MonoBehaviour
         detector.ProcessImage(inputTexture);
     }
 
-    public BlazePoseDetecter GetDetector()
-    {
-        return detector;
-    }
 }

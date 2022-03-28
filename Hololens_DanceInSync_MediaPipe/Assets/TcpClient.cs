@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
 
 public class TcpClient : MonoBehaviour
 {
@@ -29,7 +30,11 @@ public class TcpClient : MonoBehaviour
         ip = IPAddress.Parse(ip_str); //可以是局域网或互联网ip，此处是本机
         ipEnd = new IPEndPoint(ip, port);
 
+        StartConnectThread();
+    }
 
+    public void StartConnectThread()
+    {
         //开启一个线程连接，必须的，否则主线程卡死
         connectThread = new Thread(new ThreadStart(SocketReceive));
         connectThread.Start();
@@ -44,15 +49,25 @@ public class TcpClient : MonoBehaviour
         //定义套接字类型,必须在子线程中定义
         serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         print("ready to connect");
-        
-        //连接
-        serverSocket.Connect(ipEnd);
-        IsConnected = true;
 
-        //输出初次连接收到的字符串
-        recvLen = serverSocket.Receive(recvData);
-        recvStr = Encoding.ASCII.GetString(recvData, 0, recvLen);
-        print(recvStr);
+        //连接
+        try
+        {
+            serverSocket.Connect(ipEnd);
+            IsConnected = true;
+
+            //输出初次连接收到的字符串
+            recvLen = serverSocket.Receive(recvData);
+            recvStr = Encoding.ASCII.GetString(recvData, 0, recvLen);
+            print(recvStr);
+        }
+        catch (System.Exception)
+        {
+            Thread.Sleep(5000);
+            SocketConnect();
+            throw;
+        }
+        
     }
 
     public void SocketSend(string sendStr)
@@ -60,7 +75,7 @@ public class TcpClient : MonoBehaviour
         //清空发送缓存
         sendData = new byte[4096];
         //数据类型转换
-        sendData = Encoding.ASCII.GetBytes(sendStr);
+        sendData = new UTF8Encoding().GetBytes(sendStr);
         //发送
 
         Debug.Log("Sending from client str: " + sendData.Length);
@@ -70,24 +85,43 @@ public class TcpClient : MonoBehaviour
     public void SocketSend(byte[] data)
     {
         Debug.Log("Sending from client byte: " + data.Length);
-        serverSocket.Send(data, data.Length, SocketFlags.None);
+        try
+        {
+            serverSocket.Send(data, data.Length, SocketFlags.None);
+        }
+        catch (System.Exception)
+        {
+            IsConnected = false;
+            SocketQuit();
+            StartConnectThread();
+            throw;
+        }
     }
 
     void SocketReceive()
     {
         SocketConnect();
         //不断接收服务器发来的数据
-        while (true)
+        try
         {
-            recvData = new byte[4096];
-            recvLen = serverSocket.Receive(recvData);
-            if (recvLen == 0)
+            while (true)
             {
-                SocketConnect();
-                continue;
+                recvData = new byte[4096];
+                recvLen = serverSocket.Receive(recvData);
+                if (recvLen == 0)
+                {
+                    SocketConnect();
+                    continue;
+                }
+                recvStr = Encoding.ASCII.GetString(recvData, 0, recvLen);
+                print(recvStr);
             }
-            recvStr = Encoding.ASCII.GetString(recvData, 0, recvLen);
-            print(recvStr);
+        }
+        catch (System.Exception)
+        {
+            SocketQuit();
+            StartConnectThread();
+            throw;
         }
     }
 

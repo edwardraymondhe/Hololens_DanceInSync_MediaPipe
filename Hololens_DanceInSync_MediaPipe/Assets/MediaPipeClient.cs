@@ -1,31 +1,31 @@
 using UnityEngine;
-using TCPLib;
 using Newtonsoft.Json;
-using System.Text;
-using System.Threading;
 using UnityEngine.UI;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// MediaPipe clients will be fetching pose datas from streamed videos, and send to server
 /// </summary>
 public class MediaPipeClient: MonoBehaviour
 {
-    public string ip = "127.0.0.1";
-    public int port = 6001;
-
     public bool worldLandmarks = true;
     public bool runOnStart = false;
 
     public RawImage displaySendImage;
+    public WebCamInput webCamInput;
 
-    TCPClient client;
     public PoseVisuallizer3D poseVisuallizer3D;
 
-    public TcpClient landmarkTcpClient;
-    public TcpClient imageTcpClient;
+    TcpClient landmarkClient;
+    TcpClient client;
 
     private void Start()
     {
+        landmarkClient = gameObject.AddComponent<TcpClient>();
+        client = gameObject.AddComponent<TcpClient>();
+
         if (runOnStart)
             StartClient();
     }
@@ -33,12 +33,15 @@ public class MediaPipeClient: MonoBehaviour
     private void Update()
     {
         SendLandmarks();
+
+        var rect = displaySendImage.rectTransform.rect;
+        var resolution = webCamInput.GetResolution();
+        displaySendImage.GetComponent<RectTransform>().sizeDelta = resolution;
     }
 
     public void StartClient()
     {
-        landmarkTcpClient.InitSocket(ip, port);
-        imageTcpClient.InitSocket(ip, port + 1);
+        client.InitSocket(Helper.Socket.ip, Helper.Socket.port);
     }
 
     public void SendLandmarks()
@@ -46,25 +49,44 @@ public class MediaPipeClient: MonoBehaviour
         if (poseVisuallizer3D != null)
         {
             Texture text = poseVisuallizer3D.GetTexture();
-            if (landmarkTcpClient != null && landmarkTcpClient.IsConnected && text != null)
+            if (client != null && client.IsConnected && text != null)
             {
-                // Send Landmarks
+                // Resolution
+                var resolution = webCamInput.GetResolution();
+                var resX = (int)resolution.x;
+                var resY = (int)resolution.y;
+                byte[] resolutionData = Helper.ConvertHex(new List<int> { resX, resY });
+                int resolutionLength = resolutionData.Length;
+
+                // Landmarks
                 var landmarks = poseVisuallizer3D.GetLandmarks(true);
                 var serializedLandmarks = JsonConvert.SerializeObject(landmarks, Formatting.None,
                         new JsonSerializerSettings()
                         {
                             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                         });
-                SendData(serializedLandmarks);
 
+                byte[] landmarksData = new UTF8Encoding().GetBytes(serializedLandmarks);
+                int landmarksLength = landmarksData.Length;
 
-                // Send Image
-                Texture2D img_text = TextureToTexture2D(text);
-                byte[] img_bytes = img_text.EncodeToJPG(100);
-                SendData(img_bytes);
+                // Image
+                Texture2D imageTexture = TextureToTexture2D(text);
+                byte[] imageData = imageTexture.EncodeToJPG(100);
+                int imageLength = imageData.Length;
+
+                byte[] dataLengths = Helper.ConvertHex(new List<int> { 3, resolutionLength, landmarksLength, imageLength });
+
+                // Concat the datas
+                byte[] concatBytes = Helper.ConcatBytes(dataLengths, resolutionData, landmarksData, imageData);
+
+                Destroy(imageTexture);
+
+                SendData(concatBytes);
             }
         }
     }
+
+
 
     private Texture2D TextureToTexture2D(Texture texture)
     {
@@ -84,12 +106,12 @@ public class MediaPipeClient: MonoBehaviour
 
     void SendData(string message)
     {
-        landmarkTcpClient.SocketSend(message);
+        landmarkClient.SocketSend(message);
     }
 
     void SendData(byte[] data)
     {
-        imageTcpClient.SocketSend(data);
+        client.SocketSend(data);
     }
 
 }

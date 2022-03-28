@@ -24,12 +24,11 @@ public class TcpServer : MonoBehaviour
     byte[] sendData = new byte[4096]; //发送的数据，必须为字节
     int recvLen; //接收的数据长度
     Thread connectThread; //连接线程
-    Thread connectThread2; //连接线程
 
     //初始化
     public void InitSocket(int port, bool largeData)
     {
-        //定义侦听端口,侦听任何IP
+        // 定义侦听端口,侦听任何IP
         ipEnd = new IPEndPoint(IPAddress.Any, port);
         //定义套接字类型,在主线程中定义
         serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -40,10 +39,10 @@ public class TcpServer : MonoBehaviour
 
 
         //开启一个线程连接，必须的，否则主线程卡死
-        if (largeData)
+        // if (largeData)
             connectThread = new Thread(new ThreadStart(SocketReceiveImage));
-        else
-            connectThread = new Thread(new ThreadStart(SocketReceiveText));
+        // else
+        //    connectThread = new Thread(new ThreadStart(SocketReceiveText));
 
         connectThread.Start();
     }
@@ -95,6 +94,7 @@ public class TcpServer : MonoBehaviour
 
     MemoryStream ms = null;
     public int readTimes = 0;
+    
     //服务器接收
     void SocketReceiveImage()
     {
@@ -107,6 +107,7 @@ public class TcpServer : MonoBehaviour
             recvData = new byte[1024 * 1024 * 10];
             //获取收到的数据的长度
             recvLen = clientSocket.Receive(recvData);
+            Debug.Log("Received data from client: " + recvLen);
 
             //如果收到的数据长度为0，则重连并进入下一个循环
             if (recvLen == 0)
@@ -116,41 +117,15 @@ public class TcpServer : MonoBehaviour
             }
 
             ms = new MemoryStream(recvData, 0, recvLen);
+            largeDatas.Clear();
             largeDatas.Enqueue(ms.ToArray());
             readTimes++;
-            if (readTimes > 5000)
+            if (readTimes > 250)
             {
                 readTimes = 0;
                 GC.Collect(2);
             }
-            SocketSend("Received Image from client.");
-        }
-    }
-
-    void SocketReceiveText()
-    {
-        // 连接
-        SocketConnect();
-        // 进入接受循环
-        while(true)
-        {
-            //对data清零
-            recvData = new byte[1024 * 1024 * 10];
-            //获取收到的数据的长度
-            recvLen = clientSocket.Receive(recvData);
-
-            //如果收到的数据长度为0，则重连并进入下一个循环
-            if (recvLen == 0)
-            {
-                SocketConnect();
-                continue;
-            }
-
-            //输出接收到的数据
-            recvStr = Encoding.ASCII.GetString(recvData, 0, recvLen);
-            //将接收到的数据经过处理再发送出去
-            sendStr = "Received Landmarks from client.";
-            SocketSend(sendStr);
+            // Debug.Log("Received data from client: " + recvLen);
         }
     }
 
@@ -167,11 +142,6 @@ public class TcpServer : MonoBehaviour
         {
             connectThread.Interrupt();
             connectThread.Abort();
-        }
-        if (connectThread2 != null)
-        {
-            connectThread2.Interrupt();
-            connectThread2.Abort();
         }
 
         //最后关闭服务器
