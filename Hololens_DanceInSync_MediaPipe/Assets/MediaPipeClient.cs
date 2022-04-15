@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Collections;
 
 /// <summary>
 /// MediaPipe clients will be fetching pose datas from streamed videos, and send to server
@@ -16,14 +18,11 @@ public class MediaPipeClient: MonoBehaviour
     public RawImage displaySendImage;
     public WebCamInput webCamInput;
 
-    public PoseVisuallizer3D poseVisuallizer3D;
-
-    TcpClient landmarkClient;
     TcpClient client;
+    private Thread SendThread;
 
     private void Start()
     {
-        landmarkClient = gameObject.AddComponent<TcpClient>();
         client = gameObject.AddComponent<TcpClient>();
 
         if (runOnStart)
@@ -32,61 +31,60 @@ public class MediaPipeClient: MonoBehaviour
 
     private void Update()
     {
-        SendLandmarks();
-
         var rect = displaySendImage.rectTransform.rect;
         var resolution = webCamInput.GetResolution();
         displaySendImage.GetComponent<RectTransform>().sizeDelta = resolution;
+        displaySendImage.texture = webCamInput.InputImageTexture;
+        StartCoroutine(SendLandmarks());
     }
 
     public void StartClient()
     {
-        client.InitSocket(Helper.Socket.ip, Helper.Socket.port);
+        client.InitSocket(Helper.Socket.Ip, Helper.Socket.port);
     }
 
-    public void SendLandmarks()
+    IEnumerator SendLandmarks()
     {
-        if (poseVisuallizer3D != null)
+        yield return 0;
+
+        Texture text = webCamInput.InputImageTexture;
+        if (client != null && client.IsConnected && text != null)
         {
-            Texture text = poseVisuallizer3D.GetTexture();
-            if (client != null && client.IsConnected && text != null)
-            {
-                // Resolution
-                var resolution = webCamInput.GetResolution();
-                var resX = (int)resolution.x;
-                var resY = (int)resolution.y;
-                byte[] resolutionData = Helper.ConvertHex(new List<int> { resX, resY });
-                int resolutionLength = resolutionData.Length;
+            // Resolution
+            var resolution = webCamInput.GetResolution();
+            var resX = (int)resolution.x;
+            var resY = (int)resolution.y;
+            byte[] resolutionData = Helper.ConvertHex(new List<int> { resX, resY });
+            int resolutionLength = resolutionData.Length;
 
-                // Landmarks
-                var landmarks = poseVisuallizer3D.GetLandmarks(true);
-                var serializedLandmarks = JsonConvert.SerializeObject(landmarks, Formatting.None,
-                        new JsonSerializerSettings()
-                        {
-                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                        });
+            // Landmarks
+            /*
+            var landmarks = poseVisuallizer3D.GetLandmarks(true);
+            var serializedLandmarks = JsonConvert.SerializeObject(landmarks, Formatting.None,
+                    new JsonSerializerSettings()
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    });
 
-                byte[] landmarksData = new UTF8Encoding().GetBytes(serializedLandmarks);
-                int landmarksLength = landmarksData.Length;
+            byte[] landmarksData = new UTF8Encoding().GetBytes(serializedLandmarks);
+            int landmarksLength = landmarksData.Length;
+            */
 
-                // Image
-                Texture2D imageTexture = TextureToTexture2D(text);
-                byte[] imageData = imageTexture.EncodeToJPG(100);
-                int imageLength = imageData.Length;
+            // Image
+            Texture2D imageTexture = TextureToTexture2D(text);
+            byte[] imageData = imageTexture.EncodeToJPG(100);
+            int imageLength = imageData.Length;
 
-                byte[] dataLengths = Helper.ConvertHex(new List<int> { 3, resolutionLength, landmarksLength, imageLength });
+            byte[] dataLengths = Helper.ConvertHex(new List<int> { 2, resolutionLength, imageLength });
 
-                // Concat the datas
-                byte[] concatBytes = Helper.ConcatBytes(dataLengths, resolutionData, landmarksData, imageData);
+            // Concat the datas
+            byte[] concatBytes = Helper.ConcatBytes(dataLengths, resolutionData, imageData);
 
-                Destroy(imageTexture);
+            Destroy(imageTexture);
 
-                SendData(concatBytes);
-            }
+            SendData(concatBytes);
         }
     }
-
-
 
     private Texture2D TextureToTexture2D(Texture texture)
     {
@@ -104,14 +102,14 @@ public class MediaPipeClient: MonoBehaviour
         return texture2D;
     }
 
-    void SendData(string message)
-    {
-        landmarkClient.SocketSend(message);
-    }
-
     void SendData(byte[] data)
     {
         client.SocketSend(data);
+    }
+
+    private void OnApplicationQuit()
+    {
+        SendThread.Join();
     }
 
 }

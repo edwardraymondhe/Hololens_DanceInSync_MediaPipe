@@ -34,8 +34,17 @@ public class WebCamInput : MonoBehaviour
 
     void Update()
     {
-        if (!useWebCam && staticInput != null) return;
+        if (!useWebCam && staticInput != null)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+                GetComponent<VideoPlayer>().Stop();
+
+            return;
+        }
+
         if (InputImageTexture == null || !webCamTexture.didUpdateThisFrame) return;
+
+
 
         var aspect1 = (float)webCamTexture.width / webCamTexture.height;
         var aspect2 = (float)inputRT.width / inputRT.height;
@@ -48,13 +57,24 @@ public class WebCamInput : MonoBehaviour
         Graphics.Blit(webCamTexture, inputRT, scale, offset);
     }
 
-    public void PlayDevice(int idx)
+    public void PlayDevice()
     {
-        useWebCam = true;
-        webCamDevice = WebCamTexture.devices[idx];
-        if (webCamDevice.name == "")
-            webCamDevice = WebCamTexture.devices[0];
+        GetComponent<VideoPlayer>().Stop();
 
+        useWebCam = true;
+        switch (Application.platform)
+        {
+            case RuntimePlatform.Android:
+            case RuntimePlatform.IPhonePlayer:
+                webCamDeviceIndex = 1 - webCamDeviceIndex;
+                break;
+            default:
+                webCamDeviceIndex = 0;
+                break;
+        }
+
+        webCamDevice = WebCamTexture.devices[webCamDeviceIndex];
+        
         ClearTexture();
 
         var name = webCamDevice.name;
@@ -97,8 +117,8 @@ public class WebCamInput : MonoBehaviour
     {
         if (webCamTexture != null)
         {
-            if (webCamTexture.isPlaying) webCamTexture.Stop();
-
+            webCamTexture.Pause();
+            webCamTexture.Stop();
             Destroy(webCamTexture);
         }
         if (inputRT != null)

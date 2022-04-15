@@ -107,7 +107,7 @@ public class TcpServer : MonoBehaviour
             recvData = new byte[1024 * 1024 * 10];
             //获取收到的数据的长度
             recvLen = clientSocket.Receive(recvData);
-            Debug.Log("Received data from client: " + recvLen);
+            // Debug.Log("Received data from client: " + recvLen);
 
             //如果收到的数据长度为0，则重连并进入下一个循环
             if (recvLen == 0)
