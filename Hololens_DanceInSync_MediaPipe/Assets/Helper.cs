@@ -27,7 +27,6 @@ public static class Helper
             }
         }
     }
-
     public static class Pose
     {
         #region Raw Landmarks Data
@@ -47,7 +46,7 @@ public static class Helper
                 this.y = y;
                 this.z = z;
             }
-            public Landmark( Vector4 landmark)
+            public Landmark(Vector4 landmark)
             {
                 x = landmark.x;
                 y = landmark.y;
@@ -65,16 +64,16 @@ public static class Helper
         [System.Serializable]
         public class Landmarks
         {
-            public Dictionary<int, Landmark> landmarks = new Dictionary<int, Landmark>();
+            public List<Landmark> landmarks = new List<Landmark>();
 
             public Landmarks() { }
-            public Landmarks(Dictionary<int, Landmark> landmarks) { this.landmarks = landmarks; }
+            public Landmarks(List<Landmark> landmarks) { this.landmarks = landmarks; }
 
             public string GetString()
             {
                 string str = "";
                 foreach (var landmark in landmarks)
-                    str += (landmark.Value.GetString() + "\n");
+                    str += (landmark.GetString() + "\n");
 
                 return str;
             }
@@ -141,7 +140,7 @@ public static class Helper
 
         #region File Load & Save
 
-        public static void SaveInstance<T>(T t) where T: ScriptableBase
+        public static void SaveInstance<T>(T t) where T : ScriptableBase
         {
             Debug.Log(Application.persistentDataPath);
 
@@ -168,12 +167,12 @@ public static class Helper
             file.Close();
         }
 
-        public static string GetTypeDirectory<T>() where T: ScriptableBase
+        public static string GetTypeDirectory<T>() where T : ScriptableBase
         {
             return string.Format("{0}/data_{1}", Application.persistentDataPath, typeof(T).ToString());
         }
 
-        public static List<string> LoadInstanceNames<T>() where T: ScriptableBase
+        public static List<string> LoadInstanceNames<T>() where T : ScriptableBase
         {
             BinaryFormatter bf = new BinaryFormatter();
             var directoryPath = GetTypeDirectory<T>();
@@ -190,7 +189,7 @@ public static class Helper
             return parsedFiles;
         }
 
-        public static T LoadInstance<T>(string fileName) where T: ScriptableBase
+        public static T LoadInstance<T>(string fileName) where T : ScriptableBase
         {
             BinaryFormatter bf = new BinaryFormatter();
             var directoryPath = GetTypeDirectory<T>();
@@ -208,7 +207,7 @@ public static class Helper
             return t;
         }
 
-        private static string GetTempFilePath<T>() where T: ScriptableBase
+        private static string GetTempFilePath<T>() where T : ScriptableBase
         {
             var directoryPath = Application.persistentDataPath + "/data_" + typeof(T).ToString();
             var fileName = GetTempFileName<T>();
@@ -216,7 +215,7 @@ public static class Helper
             return filePath;
         }
 
-        private static string GetTempFileName<T>() where T: ScriptableBase
+        private static string GetTempFileName<T>() where T : ScriptableBase
         {
             int idx = 0;
 
@@ -251,7 +250,7 @@ public static class Helper
         public Timer(float showTime, string saveFileName)
         {
             this.showTime = showTime;
-            statFile  = new StatFile<StatStruct.Fps>(saveFileName);
+            statFile = new StatFile<StatStruct.Fps>(saveFileName);
         }
 
         public void CalculateFPS()
@@ -395,6 +394,54 @@ public static class Helper
             isInView = true;
 
         return isInView;
+    }
+
+    public static class Image
+    {
+        public static Texture2D Rotate(Texture2D originalTexture, bool clockwise)
+        {
+            Color32[] original = originalTexture.GetPixels32();
+            Color32[] rotated = new Color32[original.Length];
+            int w = originalTexture.width;
+            int h = originalTexture.height;
+
+            int iRotated, iOriginal;
+
+            for (int j = 0; j < h; ++j)
+            {
+                for (int i = 0; i < w; ++i)
+                {
+                    iRotated = (i + 1) * h - j - 1;
+                    iOriginal = clockwise ? original.Length - 1 - (j * w + i) : j * w + i;
+                    rotated[iRotated] = original[iOriginal];
+                }
+            }
+
+            Texture2D rotatedTexture = new Texture2D(h, w);
+            rotatedTexture.SetPixels32(rotated);
+            rotatedTexture.Apply();
+            return rotatedTexture;
+        }
+
+        public static Texture2D HorizontalFlip(Texture2D texture2d)
+        {
+            int width = texture2d.width;//得到图片的宽度.   
+            int height = texture2d.height;//得到图片的高度 
+
+            Texture2D NewTexture2d = new Texture2D(width, height);//创建一张同等大小的空白图片 
+
+            int i = 0;
+
+            while (i < width)
+            {
+                NewTexture2d.SetPixels(i, 0, 1, height, texture2d.GetPixels(width - i - 1, 0, 1, height));
+                i++;
+            }
+            NewTexture2d.Apply();
+
+            return NewTexture2d;
+        }
+        
     }
 
     public static class StatStruct

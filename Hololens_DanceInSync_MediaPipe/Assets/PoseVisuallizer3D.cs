@@ -163,8 +163,12 @@ public class PoseVisuallizer3D : MonoBehaviour
         if (points == null)
             points = new Dictionary<int, GameObject>();
 
+        int idx = 0;
         foreach (var landmark in landmarks.landmarks)
-            ProcessPoint(landmark.Key, landmark.Value);
+        {
+            ProcessPoint(idx, landmark);
+            idx++;
+        }
     }
 
     public void ProcessPoint(int idx, Helper.Pose.Landmark landmark)

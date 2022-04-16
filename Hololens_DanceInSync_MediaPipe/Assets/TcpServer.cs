@@ -88,9 +88,11 @@ public class TcpServer : MonoBehaviour
 
     public byte[] DequeLargeData()
     {
-        return largeDatas.Dequeue();
+        return largeData;
+        // return largeDatas.Dequeue();
     }
 
+    byte[] largeData;
 
     MemoryStream ms = null;
     public int readTimes = 0;
@@ -117,8 +119,10 @@ public class TcpServer : MonoBehaviour
             }
 
             ms = new MemoryStream(recvData, 0, recvLen);
-            largeDatas.Clear();
-            largeDatas.Enqueue(ms.ToArray());
+            // largeDatas.Clear();
+            // largeDatas.Enqueue(ms.ToArray());
+            largeData = ms.ToArray();
+
             readTimes++;
             if (readTimes > 250)
             {

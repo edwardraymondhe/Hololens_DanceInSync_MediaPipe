@@ -5,6 +5,7 @@ using System.Linq;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 using System.Threading;
+using System.Text;
 
 /// <summary>
 /// MediaPipe servers will be fetching pose datas and streamed videos from socket
@@ -12,14 +13,13 @@ using System.Threading;
 public class MediaPipeServer: MonoBehaviour
 {
     public bool runOnStart = false;
-
-    public RawImage streamImage;
-
-    TcpServer server;
-
     public int frame = 0;
+    TcpServer server;
     Helper.StatFile<Helper.StatStruct.ParseData> statParsData;
+
     private Thread ReceiveThread;
+    public bool ReceiveThreadEnd = false;
+    byte[] recvData;
 
     private void Start()
     {
@@ -33,7 +33,8 @@ public class MediaPipeServer: MonoBehaviour
     private void Update()
     {
         frame++;
-        GetLandmarks();
+        // GetLandmarks();
+        // HandleImage(recvData, new Vector2(720, 1280));
     }
 
     public void StartServer()
@@ -45,15 +46,18 @@ public class MediaPipeServer: MonoBehaviour
 
     public void GetLandmarks()
     {
-        if (server != null && server.IsConnected)
+        while (!ReceiveThreadEnd)
         {
-            if (server.GetLargeDatasCount() > 0)
-                ParseData();
-            // else
+            if (server != null && server.IsConnected)
+            {
+                if (server.GetLargeDatasCount() > 0)
+                    ParseData();
+                // else
                 // Log("Server: No landmarks detected");
-        }
-        // else
+            }
+            // else
             // Log("Server: No connected");
+        }
     }
 
     public void ParseData()
@@ -61,8 +65,13 @@ public class MediaPipeServer: MonoBehaviour
         Stopwatch sw = new Stopwatch();
         sw.Start();
 
-        byte[] recvData = server.DequeLargeData();
-        Debug.Log(recvData.Length);
+        recvData = server.DequeLargeData();
+        var recvDataString = Encoding.UTF8.GetString(recvData);
+        // Debug.Log(recvDataString);
+        // var landmarks = JsonConvert.DeserializeObject<Helper.Pose.Landmarks>(recvDataString);
+
+        // TODO: Encode data to landmarks
+
         /*
         var count_list = Helper.ConvertIntWithCount(recvData);
         int bytes_length = (count_list.Count + 1) * 4;
@@ -101,6 +110,19 @@ public class MediaPipeServer: MonoBehaviour
         statParsData.AddBuffer(new Helper.StatStruct.ParseData(frame, server.readTimes, server.GetLargeDatasCount(), sw.ElapsedMilliseconds));
     }
 
+    /*
+    private void HandleImage(Texture2D texture)
+    {
+        Debug.Log(texture);
+        if (texture == null)
+            return;
+
+        Destroy(streamImage.texture);
+        // Texture2D texture2D = new Texture2D(0, 0);
+        // texture2D.LoadImage(bytes);
+        streamImage.texture = texture;
+        streamImage.GetComponent<RectTransform>().sizeDelta = new Vector2(texture.width, texture.height);
+    }
     private void HandleImage(byte[] bytes, Vector2 resolution)
     {
         Destroy(streamImage.texture);
@@ -109,6 +131,19 @@ public class MediaPipeServer: MonoBehaviour
         streamImage.texture = texture2D;
         streamImage.GetComponent<RectTransform>().sizeDelta = resolution;
     }
+
+    public void InitStream()
+    {
+        texture2D = new Texture2D(0, 0);
+        streamImage.texture = texture2D;
+    }
+
+    public void HandleStream(byte[] bytes)
+    {
+        texture2D.LoadImage(bytes);
+        streamImage.GetComponent<RectTransform>().sizeDelta = new Vector2(texture2D.width, texture2D.height);
+    }
+    */
 
     private void HandleLandmarks(string str)
     {
@@ -124,6 +159,8 @@ public class MediaPipeServer: MonoBehaviour
 
     private void OnApplicationQuit()
     {
+        ReceiveThreadEnd = true;
+
         ReceiveThread.Join();
         statParsData.BeginWrite();
     }

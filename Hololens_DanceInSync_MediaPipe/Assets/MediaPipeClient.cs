@@ -75,9 +75,11 @@ public class MediaPipeClient: MonoBehaviour
             byte[] imageData = imageTexture.EncodeToJPG(100);
             int imageLength = imageData.Length;
 
+            // int, int, int
             byte[] dataLengths = Helper.ConvertHex(new List<int> { 2, resolutionLength, imageLength });
 
             // Concat the datas
+            // (int, int, int), (int, int), (image..)
             byte[] concatBytes = Helper.ConcatBytes(dataLengths, resolutionData, imageData);
 
             Destroy(imageTexture);
