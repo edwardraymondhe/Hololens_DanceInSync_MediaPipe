@@ -1,28 +1,51 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GlobalController : GlobalSingleTon<GlobalController>
 {
-    public Canvas poseEditorView;
-    public Canvas poseBrowserView;
-    public Canvas controlPanelView;
+    /// <summary>
+    /// 0: Music
+    /// 1: Pose
+    /// 2: Mode
+    /// 3: Tweak
+    /// </summary>
+    public int stage = 0;
 
-    [SerializeField] bool poseSequenceEditMode;
-    [SerializeField] bool poseBrowserMode;
+    #region Music Mode
     
-    // Update is called once per frame
-    void Update()
+    public void SetMusic()
     {
-        poseBrowserView.gameObject.SetActive(poseBrowserMode);
-        poseEditorView.gameObject.SetActive(poseSequenceEditMode);
-    }        
 
-    public void TogglePoseSequenceEdit()
-    {
-        poseSequenceEditMode = !poseSequenceEditMode;
     }
 
-    public void TogglePoseBrowser()
+    #endregion
+
+    #region Pose Mode
+
+    public void AddPose()
     {
-        poseBrowserMode = !poseBrowserMode;
+
     }
+
+    public void RemovePose()
+    {
+
+    }
+
+    public void ClearPose()
+    {
+
+    }
+
+    #endregion
+
+    public class PoseSequenceRuntimeData
+    {
+        public float startTime;
+        public float duration;
+        public PoseSequenceRuntimeData() { }
+        public PoseSequenceRuntimeData(float startTime, float duration) { this.startTime = startTime; this.duration = duration; }
+    }
+
+    public Dictionary<PoseSequence, PoseSequenceRuntimeData> runtimeData = new Dictionary<PoseSequence, PoseSequenceRuntimeData>(); 
 }
