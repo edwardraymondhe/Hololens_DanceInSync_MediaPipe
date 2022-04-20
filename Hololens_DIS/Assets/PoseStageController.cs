@@ -6,12 +6,16 @@ using static Helper.Pose;
 
 public class PoseStageController : BaseStageController
 {
+    public GameObject chosenObjectPrefab;
+    public GameObject chosenObjectGridCollection;
+    public List<PoseSequence> poseSequences = new List<PoseSequence>();
+
     private void Start()
     {
         SpawnCollection();
     }
 
-    public override void SpawnCollection()
+    protected override void SpawnCollection()
     {
         base.SpawnCollection();
 
@@ -28,11 +32,6 @@ public class PoseStageController : BaseStageController
         objectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
     }
 
-    #region Pose Mode
-    public GameObject chosenObjectPrefab;
-    public GameObject chosenObjectGridCollection;
-    public List<PoseSequence> poseSequences = new List<PoseSequence>();
-    
     public void AddPose(PoseSequence poseSequence)
     {
         poseSequences.Add(poseSequence);
@@ -81,7 +80,4 @@ public class PoseStageController : BaseStageController
     {
         return poseSequences.Contains(poseSequence);
     }
-
-    #endregion
-
 }

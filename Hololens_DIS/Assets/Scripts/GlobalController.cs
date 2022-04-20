@@ -1,6 +1,7 @@
 using RhythmTool.Examples;
 using System.Collections.Generic;
 using UnityEngine;
+using Microsoft.MixedReality.Toolkit.Utilities;
 
 public class GlobalController : GlobalSingleTon<GlobalController>
 {
@@ -12,9 +13,43 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     /// </summary>
     public int stage = 0;
 
-    public MusicStageController musicStage;
-    public PoseStageController poseStage;
-    public ModeStageController modeStage;
+    public List<BaseStageController> baseStageControllers = new List<BaseStageController>();
+
+    public GameObject screenObjectCollection;
+
+    private void Start()
+    {
+        SetStage(0);
+    }
+
+    public T GetStage<T>() where T : BaseStageController
+    {
+        BaseStageController foundStageController = null;
+        foreach (var stageController in baseStageControllers)
+        {
+            if (stageController is T)
+                return stageController as T;
+        }
+
+        return foundStageController as T;
+    }
+
+    private T SetStage<T>() where T : BaseStageController
+    {
+        BaseStageController foundStageController = null;
+        foreach (var stageController in baseStageControllers)
+        {
+            if (stageController is T)
+            {
+                foundStageController = stageController;
+                stageController.gameObject.SetActive(true);
+            }
+            else
+                stageController.gameObject.SetActive(false);
+        }
+
+        return foundStageController as T;
+    }
 
     public void SetStage(int idx)
     {
@@ -23,18 +58,28 @@ public class GlobalController : GlobalSingleTon<GlobalController>
         switch (stage)
         {
             case 0:
+                SetStage<MusicStageController>();
                 break;
             case 1:
+                SetStage<PoseStageController>();
                 break;
             case 2:
+                var modeStage = SetStage<ModeStageController>();
                 modeStage.Init();
                 break;
             case 3:
+                var mode = GetStage<ModeStageController>();
+                var pose = GetStage<PoseStageController>();
+                var tweakStage = SetStage<TweakStageController>();
+                tweakStage.Init(mode, pose);
                 break;
             default:
                 break;
         }
+
+        screenObjectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
     }
+
 
     public void PrevStage()
     {

@@ -18,8 +18,7 @@ public class MusicStageController : BaseStageController
     {
         // TODO: Loop for 8 * 8Beat
     }
-
-    public override void SpawnCollection()
+    protected override void SpawnCollection()
     {
         base.SpawnCollection();
 
@@ -34,19 +33,18 @@ public class MusicStageController : BaseStageController
         objectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
     }
 
-
     #region Music Mode
     
     public AudioClipSelector audioClipSelector;
+    public float chosenEightBeatDuration = 0.0f;
+    public int chosenStartEightBeat = 4;
+    public float chosenStartTime = 0.0f; 
+    
     public async void SetMusic(int index)
     {
         await audioClipSelector.PlaySong(index);
         GetEightBeat();
     }
-
-    public float chosenEightBeatDuration = 0.0f;
-    public int chosenStartEightBeat = 4;
-    public float chosenStartTime = 0.0f;
 
     /// <summary>
     /// 1. Get the duration for a whole eight-beats
