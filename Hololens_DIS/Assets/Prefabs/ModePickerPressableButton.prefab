@@ -367,6 +367,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PosePickerPressableButton, Assembly-CSharp
+        m_MethodName: TogglePose
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   Events:
   - Event:
       m_PersistentCalls:
@@ -623,7 +635,7 @@ MonoBehaviour:
   localForward: {x: 0, y: 0, z: -1}
   localUp: {x: 0, y: 1, z: 0}
   localCenter: {x: 0, y: 0, z: -0.008}
-  bounds: {x: 0.032, y: 0.032}
+  bounds: {x: 0.128, y: 0.048}
   touchableCollider: {fileID: 2705135624558084849}
 --- !u!114 &2705135624558084855
 MonoBehaviour:

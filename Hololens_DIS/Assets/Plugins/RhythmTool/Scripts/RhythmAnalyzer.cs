@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
@@ -81,6 +81,7 @@ namespace RhythmTool
 
             this.audioClip = audioClip;
             this.initialLength = Mathf.RoundToInt(initialLength * audioClip.frequency / hopSize) - 1;
+            Debug.Log("Analyzing initial length: " + this.initialLength);
 
             Initialize();
             
@@ -134,6 +135,8 @@ namespace RhythmTool
 
         private void StartAnalyze()
         {
+            Debug.Log("Start Analyzing");
+
             int bufferSize = hopSize * bufferCount + (frameSize - hopSize);
             buffer = new float[bufferSize * channels];
 
@@ -157,6 +160,7 @@ namespace RhythmTool
                 if (index == 0)
                     FillBuffer();
 
+                // Debug.Log(string.Format("Source Length: {0}\nDest Length: {1}", buffer.Length, samples.Length));
                 Array.Copy(buffer, index * hopSize * channels, samples, 0, samples.Length);
 
                 ProcessFrame(samples);
@@ -171,6 +175,7 @@ namespace RhythmTool
 
         private void OnAnalysisDone()
         {
+            Debug.Log("Analysis is done");
             isDone = true;
         }
 
@@ -203,7 +208,9 @@ namespace RhythmTool
             }
 
             getData = false;
-            audioClip.GetData(buffer, lastFrame * hopSize);
+            var offsetSamples = lastFrame * hopSize;
+            // Debug.Log("OffsetSamples: " + offsetSamples);
+            audioClip.GetData(buffer, offsetSamples);
             waitForMainThread.Set();
         }
 

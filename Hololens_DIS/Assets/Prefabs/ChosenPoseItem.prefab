@@ -111,7 +111,7 @@ MonoBehaviour:
   m_text: Button
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6a84f857bec7e7345843ae29404c57ce, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21202819797275496, guid: 6a84f857bec7e7345843ae29404c57ce, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1235,6 +1235,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6282841799226565354}
   - component: {fileID: 6282841799226565353}
+  - component: {fileID: 7059870743070701123}
   m_Layer: 0
   m_Name: ChosenPoseItem
   m_TagString: Untagged
@@ -1298,6 +1299,22 @@ MonoBehaviour:
   cellWidth: 0.05
   cellHeight: 0.5
   assetVersion: 1
+--- !u!114 &7059870743070701123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6282841799226565355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8f683a1cd9b5704cb5ea61a1ff61980, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemIndex: 0
+  itemName: 
+  text: {fileID: 6215823228163149041}
+  poseSequence: {fileID: 0}
 --- !u!1 &7472690806783552861
 GameObject:
   m_ObjectHideFlags: 0

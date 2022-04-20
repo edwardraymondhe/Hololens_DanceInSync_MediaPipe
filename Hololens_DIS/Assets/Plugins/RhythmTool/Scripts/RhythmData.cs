@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -192,6 +192,8 @@ namespace RhythmTool
         /// <returns>A new RhythmData object.</returns>
         public static RhythmData Create(AudioClip audioClip, IEnumerable<Track> tracks)
         {
+            Debug.Log("Creating RhythmData");
+
             RhythmData data = CreateInstance<RhythmData>();
 
             data.audioClip = audioClip;

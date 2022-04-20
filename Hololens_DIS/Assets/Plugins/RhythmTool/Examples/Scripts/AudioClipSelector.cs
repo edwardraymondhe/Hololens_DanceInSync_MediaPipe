@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace RhythmTool.Examples
@@ -17,6 +18,12 @@ namespace RhythmTool.Examples
             //Stop playing.
             player.Stop();           
         }
+
+        public virtual void PrevSong()
+        {
+            //Stop playing.
+            player.Stop();
+        }
     }
 
     /// <summary>
@@ -24,17 +31,18 @@ namespace RhythmTool.Examples
     /// </summary>
     public class AudioClipSelector : SongSelector
     {
-        public List<AudioClip> songs;
+        public List<AudioClipData> songs;
+        public float initialLength = 0.0f;
 
         private int currentSong = -1;
 
         void Start()
         {
             //Immediately go to the next song.
-            NextSong();
+            // NextSong();
         }
 
-        public override void NextSong()
+        public override async void NextSong()
         {
             base.NextSong();
 
@@ -47,11 +55,47 @@ namespace RhythmTool.Examples
             if (currentSong >= songs.Count)
                 currentSong = 0;
 
-            AudioClip audioClip = songs[currentSong];
-            RhythmData rhythmData = analyzer.Analyze(audioClip, 6);
+            await PlaySong(currentSong);
+        }
+
+        private RhythmData AnalyzeRhythmData()
+        {
+            AudioClip audioClip = songs[currentSong].audioClip;
+            //return analyzer.Analyze(audioClip, audioClip.length / 2.0f);
+            return analyzer.Analyze(audioClip, audioClip.length / 10.0f);
+        }
+
+
+        public override async void PrevSong()
+        {
+            base.PrevSong();
+
+            //Clean up old resources.
+            Destroy(player.rhythmData);
+
+            //start analyzing the next song.
+            currentSong--;
+
+            if (currentSong < 0)
+                currentSong = songs.Count - 1;
+
+            await PlaySong(currentSong);
+        }
+
+        public async Task PlaySong(int idx)
+        {
+            currentSong = idx;
 
             //Give the RhythmData to the RhythmPlayer.
-            player.rhythmData = rhythmData;
+            player.rhythmData = AnalyzeRhythmData();
+
+            while (!analyzer.isDone)
+                await Task.Yield();
+        }
+
+        public AudioClip GetSong()
+        {
+            return songs[currentSong].audioClip;
         }
     }
 }

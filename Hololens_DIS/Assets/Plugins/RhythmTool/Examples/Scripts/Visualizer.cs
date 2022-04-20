@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +13,10 @@ namespace RhythmTool.Examples
         public Text textBPM;
 
         public Line linePrefab;
+
+        public GameObject symbolParent;
+
+        public bool isMrtk = false;
 
         private List<Line> lines;
 
@@ -64,11 +68,16 @@ namespace RhythmTool.Examples
             //so they will move as the song plays.
             foreach (Line line in lines)
             {
-                Vector3 position = line.transform.position;
+                Vector3 position;
+                if (isMrtk)
+                    position = line.transform.localPosition;
+                else
+                    position = line.transform.position;
 
                 position.x = line.timestamp - time;
 
-                line.transform.position = position;
+                // line.transform.position = position;
+                line.transform.localPosition = position;
             }
         }
                 
@@ -125,8 +134,20 @@ namespace RhythmTool.Examples
 
         private void CreateLine(float timestamp, float position, float scale, Color color, float opacity)
         {
-            Line line = Instantiate(linePrefab);
-            line.transform.position = new Vector3(0, position, 0);
+            Line line;
+            
+            if (isMrtk)
+            {
+                line = Instantiate(linePrefab, symbolParent.transform);
+                line.transform.localPosition = new Vector3(0, position, 0);
+            }
+            else
+            {
+                line = Instantiate(linePrefab);
+                line.transform.position = new Vector3(0, position, 0);
+            }
+
+            
             line.transform.localScale = new Vector3(.1f, scale, .01f);
 
             line.Init(color, opacity, timestamp);

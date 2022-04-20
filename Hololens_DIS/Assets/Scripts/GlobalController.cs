@@ -1,3 +1,4 @@
+using RhythmTool.Examples;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,33 +12,47 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     /// </summary>
     public int stage = 0;
 
-    #region Music Mode
-    
-    public void SetMusic()
-    {
+    public MusicStageController musicStage;
+    public PoseStageController poseStage;
+    public ModeStageController modeStage;
 
+    public void SetStage(int idx)
+    {
+        stage = idx;
+
+        switch (stage)
+        {
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                modeStage.Init();
+                break;
+            case 3:
+                break;
+            default:
+                break;
+        }
     }
 
-    #endregion
-
-    #region Pose Mode
-
-    public void AddPose()
+    public void PrevStage()
     {
+        stage--;
+        if (stage < 0)
+            return;
 
+        SetStage(stage);
     }
 
-    public void RemovePose()
+    public void NextStage()
     {
+        stage++;
+        if (stage > 3)
+            return;
 
+        SetStage(stage);
     }
-
-    public void ClearPose()
-    {
-
-    }
-
-    #endregion
 
     public class PoseSequenceRuntimeData
     {
