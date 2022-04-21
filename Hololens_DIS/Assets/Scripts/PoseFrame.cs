@@ -12,6 +12,10 @@ public class PoseFrame : ScriptableBase
     public float duration = 0.5f;
     public bool blank = false;
 
+    private float widthFactor;
+    private float heightFactor;
+    private float depthFactor;
+
     #region Initialization
 
     public PoseFrame() { }
@@ -41,6 +45,15 @@ public class PoseFrame : ScriptableBase
     private void Init(PoseFrame lastPoseFrame, float duration, Landmarks landmarks, float widthFactor, float heightFactor, float depthFactor)
     {
         bonePairs = GetInitBonePairs();
+        this.widthFactor = widthFactor;
+        this.heightFactor = heightFactor;
+        this.depthFactor = depthFactor;
+
+        SetParams(lastPoseFrame, duration, landmarks);
+    }
+
+    public void SetParams(PoseFrame lastPoseFrame, float duration, Landmarks landmarks)
+    {
         foreach (var bonePair in bonePairs)
         {
             List<Vector3> positions = bonePair.bonePairLink.GetImagePositions(landmarks, widthFactor, heightFactor, depthFactor);
@@ -49,6 +62,17 @@ public class PoseFrame : ScriptableBase
             var lastFrameBonePair = lastPoseFrame.bonePairs.Find(e => e.bonePairLink.Equals(bonePair.bonePairLink));
             bonePair.bonePairStatus.velocity = (angle - (lastFrameBonePair == null ? angle : lastFrameBonePair.bonePairStatus.angle)) / (duration);
         }
+        this.duration = duration;
+    }
+
+    public void UpdateParams(PoseFrame lastPoseFrame, float duration)
+    {
+        foreach (var bonePair in bonePairs)
+        {
+            var lastFrameBonePair = lastPoseFrame.bonePairs.Find(e => e.bonePairLink.Equals(bonePair.bonePairLink));
+            bonePair.bonePairStatus.velocity = (bonePair.bonePairStatus.angle - (lastFrameBonePair == null ? bonePair.bonePairStatus.angle : lastFrameBonePair.bonePairStatus.angle)) / (duration);
+        }
+
         this.duration = duration;
     }
 

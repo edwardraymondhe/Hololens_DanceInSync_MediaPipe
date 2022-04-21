@@ -264,7 +264,7 @@ public static class Helper
                 count = 0;
                 deltaTime = 0f;
 
-                var str = string.Format("µ±Ç°Ã¿Ö¡Ö´ĞĞ¼ä¸ô£º{0:0.0} ms ({1:0.} Ö¡Ã¿Ãë)", milliSecond, fps);
+                var str = string.Format("å½“å‰æ¯å¸§æ‰§è¡Œé—´éš”ï¼š{0:0.0} ms ({1:0.} å¸§æ¯ç§’)", milliSecond, fps);
 
                 if (showText != null)
                     showText.text = str;
@@ -279,6 +279,18 @@ public static class Helper
             if (statFile != null)
                 statFile.BeginWrite();
         }
+    }
+
+    public static object DeepCopy(object src)
+    {
+        MemoryStream ms = new MemoryStream();
+        BinaryFormatter bf = new BinaryFormatter();
+        bf.Serialize(ms, src);
+
+        ms.Seek(0, SeekOrigin.Begin);
+        object dst = bf.Deserialize(ms);
+        ms.Close();
+        return dst;
     }
 
     public static List<int> ConvertInt(byte[] bytes)
@@ -318,7 +330,7 @@ public static class Helper
             int velocity = val;
             int offset = count * 4;
             hex[0 + offset] = (byte)((velocity >> (8 * (0 + offset))) & 0xff);
-            hex[1 + offset] = (byte)((velocity >> (8 * (1 + offset))) & 0xff);   //ÏÈÓÒÒÆÔÙÓë²Ù×÷
+            hex[1 + offset] = (byte)((velocity >> (8 * (1 + offset))) & 0xff);   //å…ˆå³ç§»å†ä¸æ“ä½œ
             hex[2 + offset] = (byte)((velocity >> (8 * (2 + offset))) & 0xff);
             hex[3 + offset] = (byte)((velocity >> (8 * (3 + offset))) & 0xff);
             count++;
@@ -328,10 +340,10 @@ public static class Helper
     }
 
     /// <summary>
-    /// ºÏ²¢byteÊı×é
+    /// åˆå¹¶byteæ•°ç»„
     /// </summary>
-    /// <param name="sourceBytesArray">ÒªºÏ²¢µÄÊı×é¼¯ºÏ</param>
-    /// <returns>ºÏ²¢ºóµÄbyteÊı×é</returns>
+    /// <param name="sourceBytesArray">è¦åˆå¹¶çš„æ•°ç»„é›†åˆ</param>
+    /// <returns>åˆå¹¶åçš„byteæ•°ç»„</returns>
     public static byte[] ConcatBytes(params byte[][] sourceBytesArray)
     {
         int allLength = sourceBytesArray.Sum(o => o.Length);
@@ -345,11 +357,11 @@ public static class Helper
     }
 
     /// <summary>
-    /// »ñÈ¡¸´ÖÆ¿ªÊ¼´¦µÄË÷Òı
+    /// è·å–å¤åˆ¶å¼€å§‹å¤„çš„ç´¢å¼•
     /// </summary>
-    /// <param name="sourceBytesArray">byte[]µÄËùÔÚÊı×é</param>
-    /// <param name="index">byte[]µÄËùÔÚÊı×éµÄË÷Òı</param>
-    /// <returns>¸´ÖÆ¿ªÊ¼´¦µÄË÷Òı</returns>
+    /// <param name="sourceBytesArray">byte[]çš„æ‰€åœ¨æ•°ç»„</param>
+    /// <param name="index">byte[]çš„æ‰€åœ¨æ•°ç»„çš„ç´¢å¼•</param>
+    /// <returns>å¤åˆ¶å¼€å§‹å¤„çš„ç´¢å¼•</returns>
     private static int GetCopyToIndex(byte[][] sourceBytesArray, int index)
     {
         if (index == 0)
@@ -360,7 +372,7 @@ public static class Helper
     }
 
     /// <summary>
-    /// »ñÈ¡Êó±êÍ£Áô´¦UI
+    /// è·å–é¼ æ ‡åœç•™å¤„UI
     /// </summary>
     /// <param name="canvas"></param>
     /// <returns></returns>
@@ -425,10 +437,10 @@ public static class Helper
 
         public static Texture2D HorizontalFlip(Texture2D texture2d)
         {
-            int width = texture2d.width;//µÃµ½Í¼Æ¬µÄ¿í¶È.   
-            int height = texture2d.height;//µÃµ½Í¼Æ¬µÄ¸ß¶È 
+            int width = texture2d.width;//å¾—åˆ°å›¾ç‰‡çš„å®½åº¦.   
+            int height = texture2d.height;//å¾—åˆ°å›¾ç‰‡çš„é«˜åº¦ 
 
-            Texture2D NewTexture2d = new Texture2D(width, height);//´´½¨Ò»ÕÅÍ¬µÈ´óĞ¡µÄ¿Õ°×Í¼Æ¬ 
+            Texture2D NewTexture2d = new Texture2D(width, height);//åˆ›å»ºä¸€å¼ åŒç­‰å¤§å°çš„ç©ºç™½å›¾ç‰‡ 
 
             int i = 0;
 
@@ -509,12 +521,12 @@ public static class Helper
             }
         }
 
-        //Ğ´ÈëÊı¾İ
+        //å†™å…¥æ•°æ®
         private bool WriteToFile(string filePath)
         {
             if (!File.Exists(filePath))
             {
-                //ÎÄ±¾²»´æÔÚ´´½¨ÎÄ±¾
+                //æ–‡æœ¬ä¸å­˜åœ¨åˆ›å»ºæ–‡æœ¬
                 FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate);
                 StreamWriter sw = new StreamWriter(fileStream, Encoding.UTF8);
                 sw.WriteLine("[");

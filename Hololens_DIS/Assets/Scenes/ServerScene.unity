@@ -1714,9 +1714,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4689773fded70954094c42da1b41e1e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  humanoid: {fileID: 919132149263727943}
-  bodyRotation: {x: 0, y: 0, z: 0}
-  poseVisuallizer3D: {fileID: 690516749}
 --- !u!1 &248074257
 GameObject:
   m_ObjectHideFlags: 0
@@ -3606,7 +3603,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &690516749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3838,11 +3835,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5e3dce9aceb9b64e8cecf2023baa6c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  poseEditorView: {fileID: 1282904079}
-  poseBrowserView: {fileID: 1722075305}
-  controlPanelView: {fileID: 1396523305}
-  poseSequenceEditMode: 1
-  poseBrowserMode: 1
+  stage: 0
+  baseStageControllers: []
+  screenObjectCollection: {fileID: 0}
 --- !u!4 &720518344
 Transform:
   m_ObjectHideFlags: 0
@@ -5931,9 +5926,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4689773fded70954094c42da1b41e1e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  humanoid: {fileID: 1229167092}
-  bodyRotation: {x: 0, y: 0, z: 0}
-  poseVisuallizer3D: {fileID: 690516749}
 --- !u!95 &1229167095
 Animator:
   serializedVersion: 3

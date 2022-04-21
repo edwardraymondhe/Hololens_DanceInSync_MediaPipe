@@ -12,7 +12,17 @@ namespace RhythmTool.Examples
     {
         public RhythmAnalyzer analyzer;
         public RhythmPlayer player;
-              
+        
+        public virtual void PauseSong()
+        {
+            player.Pause();
+        }
+
+        public virtual void UnPauseSong()
+        {
+            player.UnPause();
+        }
+
         public virtual void NextSong()
         {
             //Stop playing.

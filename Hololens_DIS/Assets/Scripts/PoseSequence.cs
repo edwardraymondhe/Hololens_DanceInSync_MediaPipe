@@ -52,6 +52,9 @@ public class PoseSequence : ScriptableBase
         poseFrames.Add(poseFrame);
         angles.Add(false);
         velocities.Add(false);
+
+        // TODO: Recalculate velocities
+        CalculateVelocities();
     }
 
     public void Insert(int idx, PoseFrame poseFrame, bool angle, bool velocity)
@@ -59,6 +62,9 @@ public class PoseSequence : ScriptableBase
         poseFrames.Insert(idx, poseFrame);
         angles.Insert(idx, angle);
         velocities.Insert(idx, velocity);
+
+        // TODO: Recalculate velocities
+        CalculateVelocities();
     }
 
     public void Remove(PoseFrame poseFrame)
@@ -67,5 +73,40 @@ public class PoseSequence : ScriptableBase
         poseFrames.RemoveAt(idx);
         angles.RemoveAt(idx);
         velocities.RemoveAt(idx);
+
+        // TODO: Recalculate velocities
+        CalculateVelocities();
+    }
+
+    private void CalculateVelocities()
+    {
+        PoseFrame currentPoseFrame;
+        PoseFrame lastPoseFrame = null;
+        
+        foreach (var poseFrame in poseFrames)
+        {
+            currentPoseFrame = poseFrame;
+            currentPoseFrame.UpdateParams(lastPoseFrame, currentPoseFrame.duration);
+        }
+    }
+
+    public void FitTotalDuration(float newTotalDuration)
+    {
+        float oldTotalDuration = 0.0f;
+        foreach (var poseFrame in poseFrames)
+            oldTotalDuration += poseFrame.duration;
+
+        float factor = newTotalDuration / oldTotalDuration;
+        foreach (var poseFrame in poseFrames)
+            poseFrame.duration = poseFrame.duration * factor;
+
+        PoseFrame currentPoseFrame;
+        PoseFrame lastPoseFrame = null;
+
+        foreach (var poseFrame in poseFrames)
+        {
+            currentPoseFrame = poseFrame;
+            currentPoseFrame.UpdateParams(lastPoseFrame, currentPoseFrame.duration);
+        }
     }
 }

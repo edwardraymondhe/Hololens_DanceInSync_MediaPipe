@@ -2,6 +2,7 @@ using RhythmTool.Examples;
 using System.Collections.Generic;
 using UnityEngine;
 using Microsoft.MixedReality.Toolkit.Utilities;
+using UnityEngine.SceneManagement;
 
 public class GlobalController : GlobalSingleTon<GlobalController>
 {
@@ -13,18 +14,19 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     /// </summary>
     public int stage = 0;
 
-    public List<BaseStageController> baseStageControllers = new List<BaseStageController>();
+    public List<BasePrepareStageController> baseStageControllers = new List<BasePrepareStageController>();
 
     public GameObject screenObjectCollection;
 
     private void Start()
     {
-        SetStage(0);
+        if (SceneManager.GetActiveScene().name == "MRTK")
+            SetStage(0);
     }
 
-    public T GetStage<T>() where T : BaseStageController
+    public T GetStage<T>() where T : BasePrepareStageController
     {
-        BaseStageController foundStageController = null;
+        BasePrepareStageController foundStageController = null;
         foreach (var stageController in baseStageControllers)
         {
             if (stageController is T)
@@ -34,9 +36,9 @@ public class GlobalController : GlobalSingleTon<GlobalController>
         return foundStageController as T;
     }
 
-    private T SetStage<T>() where T : BaseStageController
+    private T SetStage<T>() where T : BasePrepareStageController
     {
-        BaseStageController foundStageController = null;
+        BasePrepareStageController foundStageController = null;
         foreach (var stageController in baseStageControllers)
         {
             if (stageController is T)
