@@ -47,14 +47,15 @@ public class PoseSequence : ScriptableBase
         velocities[idx] = value;
     }
 
-    public void Add(PoseFrame poseFrame)
+    public void Add(PoseFrame poseFrame, bool edit = false)
     {
         poseFrames.Add(poseFrame);
         angles.Add(false);
         velocities.Add(false);
 
         // TODO: Recalculate velocities
-        CalculateVelocities();
+        if (edit)
+            CalculateVelocities();
     }
 
     public void Insert(int idx, PoseFrame poseFrame, bool angle, bool velocity)

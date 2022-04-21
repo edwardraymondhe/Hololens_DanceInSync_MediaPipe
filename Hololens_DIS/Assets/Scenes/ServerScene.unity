@@ -599,9 +599,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 690516749}
-        m_TargetAssemblyTypeName: PoseVisuallizer3D, Assembly-CSharp
-        m_MethodName: TogglePoseRecording
+      - m_Target: {fileID: 1576645078}
+        m_TargetAssemblyTypeName: MediaPipeServer, Assembly-CSharp
+        m_MethodName: ProcessPoseFrame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1542,8 +1542,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 690516749}
-        m_TargetAssemblyTypeName: PoseVisuallizer3D, Assembly-CSharp
+      - m_Target: {fileID: 1576645078}
+        m_TargetAssemblyTypeName: MediaPipeServer, Assembly-CSharp
         m_MethodName: TogglePoseRecording
         m_Mode: 1
         m_Arguments:
@@ -2437,6 +2437,11 @@ MonoBehaviour:
   streamToggleIcon: {fileID: 380865424}
   isStartReload: 0
   frontCamera: 1
+  xyFactor: 0.15
+  zFactor: 25
+  widthFactor: 0
+  heightFactor: 0
+  depthFactor: 0
 --- !u!1 &428379566
 GameObject:
   m_ObjectHideFlags: 0
@@ -3603,7 +3608,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &690516749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7393,7 +7398,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runOnStart: 1
   frame: 0
+  ipCamera: {fileID: 391452612}
+  poseEditor: {fileID: 1964447627}
+  poseLandmarks:
+    landmarks: []
   ReceiveThreadEnd: 0
+  lastPoseFrame: {fileID: 0}
+  currentPoseFrame: {fileID: 0}
+  isPoseStartRecording: 0
+  isPoseNowRecording: 0
 --- !u!4 &1576645079
 Transform:
   m_ObjectHideFlags: 0

@@ -12,9 +12,9 @@ public class PoseFrame : ScriptableBase
     public float duration = 0.5f;
     public bool blank = false;
 
-    private float widthFactor;
-    private float heightFactor;
-    private float depthFactor;
+    public float widthFactor;
+    public float heightFactor;
+    public float depthFactor;
 
     #region Initialization
 

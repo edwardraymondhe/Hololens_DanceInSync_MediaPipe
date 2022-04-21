@@ -7,17 +7,17 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 /*
-    Õı & Êú£º
-    ÊúÆÁ & ¾µÏñ
+    æ­£ & ç«–ï¼š
+    ç«–å± & é•œåƒ
 
-    ÄæÊ±Õë & ºá£º
-    ºáÆÁ & ÎŞ¾µÏñ
+    é€†æ—¶é’ˆ & æ¨ªï¼š
+    æ¨ªå± & æ— é•œåƒ
 
-    Ë³Ê±Õë & ºá£º
-    ºáÆÁ & ·­×ª
+    é¡ºæ—¶é’ˆ & æ¨ªï¼š
+    æ¨ªå± & ç¿»è½¬
 
-    ·´ & Êú£º
-    ÊúÆÁ & ·­×ª
+    å & ç«–ï¼š
+    ç«–å± & ç¿»è½¬
 */
 
 public class IpCamera : MonoBehaviour
@@ -125,7 +125,11 @@ public class IpCamera : MonoBehaviour
         // get response
         WebResponse resp = req.GetResponse();
     }
-
+    public float xyFactor = 0.15f;
+    public float zFactor = 25f; 
+    public float widthFactor = 0.0f;
+    public float heightFactor = 0.0f;
+    public float depthFactor = 0.0f;
     private IEnumerator GetFrame()
     {
         Byte[] JpegData = new Byte[1000000];
@@ -155,7 +159,12 @@ public class IpCamera : MonoBehaviour
             texture.LoadImage(ms.GetBuffer());
 
             if (isStreamOn)
+            {
                 streamImage.GetComponent<RectTransform>().sizeDelta = new Vector2(texture.width, texture.height);
+                widthFactor = streamImage.texture.width * xyFactor;
+                heightFactor = streamImage.texture.height * xyFactor;
+                depthFactor = zFactor;
+            }
             else
                 streamImage.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 0);
 

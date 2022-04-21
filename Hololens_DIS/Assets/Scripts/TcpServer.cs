@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-//ÒıÈë¿â
+//å¼•å…¥åº“
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -14,31 +14,31 @@ public class TcpServer : MonoBehaviour
     public bool IsConnected = false;
     private Queue<byte[]> largeDatas = new Queue<byte[]>();
     
-    //ÒÔÏÂÄ¬ÈÏ¶¼ÊÇË½ÓĞµÄ³ÉÔ±
-    Socket serverSocket; //·şÎñÆ÷¶Ësocket
-    Socket clientSocket; //¿Í»§¶Ësocket
-    IPEndPoint ipEnd; //ÕìÌı¶Ë¿Ú
-    public string recvStr; //½ÓÊÕµÄ×Ö·û´®
-    public string sendStr; //·¢ËÍµÄ×Ö·û´®
-    byte[] recvData = new byte[1024 * 1024 * 10]; //½ÓÊÕµÄÊı¾İ£¬±ØĞëÎª×Ö½Ú
-    byte[] sendData = new byte[4096]; //·¢ËÍµÄÊı¾İ£¬±ØĞëÎª×Ö½Ú
-    int recvLen; //½ÓÊÕµÄÊı¾İ³¤¶È
-    Thread connectThread; //Á¬½ÓÏß³Ì
+    //ä»¥ä¸‹é»˜è®¤éƒ½æ˜¯ç§æœ‰çš„æˆå‘˜
+    Socket serverSocket; //æœåŠ¡å™¨ç«¯socket
+    Socket clientSocket; //å®¢æˆ·ç«¯socket
+    IPEndPoint ipEnd; //ä¾¦å¬ç«¯å£
+    public string recvStr; //æ¥æ”¶çš„å­—ç¬¦ä¸²
+    public string sendStr; //å‘é€çš„å­—ç¬¦ä¸²
+    byte[] recvData = new byte[1024 * 1024 * 10]; //æ¥æ”¶çš„æ•°æ®ï¼Œå¿…é¡»ä¸ºå­—èŠ‚
+    byte[] sendData = new byte[4096]; //å‘é€çš„æ•°æ®ï¼Œå¿…é¡»ä¸ºå­—èŠ‚
+    int recvLen; //æ¥æ”¶çš„æ•°æ®é•¿åº¦
+    Thread connectThread; //è¿æ¥çº¿ç¨‹
 
-    //³õÊ¼»¯
+    //åˆå§‹åŒ–
     public void InitSocket(int port, bool largeData)
     {
-        // ¶¨ÒåÕìÌı¶Ë¿Ú,ÕìÌıÈÎºÎIP
+        // å®šä¹‰ä¾¦å¬ç«¯å£,ä¾¦å¬ä»»ä½•IP
         ipEnd = new IPEndPoint(IPAddress.Any, port);
-        //¶¨ÒåÌ×½Ó×ÖÀàĞÍ,ÔÚÖ÷Ïß³ÌÖĞ¶¨Òå
+        //å®šä¹‰å¥—æ¥å­—ç±»å‹,åœ¨ä¸»çº¿ç¨‹ä¸­å®šä¹‰
         serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        //Á¬½Ó
+        //è¿æ¥
         serverSocket.Bind(ipEnd);
-        //¿ªÊ¼ÕìÌı,×î´ó10¸öÁ¬½Ó
+        //å¼€å§‹ä¾¦å¬,æœ€å¤§10ä¸ªè¿æ¥
         serverSocket.Listen(10);
 
 
-        //¿ªÆôÒ»¸öÏß³ÌÁ¬½Ó£¬±ØĞëµÄ£¬·ñÔòÖ÷Ïß³Ì¿¨ËÀ
+        //å¼€å¯ä¸€ä¸ªçº¿ç¨‹è¿æ¥ï¼Œå¿…é¡»çš„ï¼Œå¦åˆ™ä¸»çº¿ç¨‹å¡æ­»
         // if (largeData)
             connectThread = new Thread(new ThreadStart(SocketReceiveImage));
         // else
@@ -47,7 +47,7 @@ public class TcpServer : MonoBehaviour
         connectThread.Start();
     }
 
-    //Á¬½Ó
+    //è¿æ¥
     void SocketConnect()
     {
         if (clientSocket != null)
@@ -55,30 +55,35 @@ public class TcpServer : MonoBehaviour
 
         IsConnected = false;
 
-        //¿ØÖÆÌ¨Êä³öÕìÌı×´Ì¬
+        //æ§åˆ¶å°è¾“å‡ºä¾¦å¬çŠ¶æ€
         print("Waiting for a client");
-        //Ò»µ©½ÓÊÜÁ¬½Ó£¬´´½¨Ò»¸ö¿Í»§¶Ë
+        //ä¸€æ—¦æ¥å—è¿æ¥ï¼Œåˆ›å»ºä¸€ä¸ªå®¢æˆ·ç«¯
         clientSocket = serverSocket.Accept();
 
         IsConnected = true;
 
-        //»ñÈ¡¿Í»§¶ËµÄIPºÍ¶Ë¿Ú
+        //è·å–å®¢æˆ·ç«¯çš„IPå’Œç«¯å£
         IPEndPoint ipEndClient = (IPEndPoint)clientSocket.RemoteEndPoint;
-        //Êä³ö¿Í»§¶ËµÄIPºÍ¶Ë¿Ú
+        //è¾“å‡ºå®¢æˆ·ç«¯çš„IPå’Œç«¯å£
         print("Connect with " + ipEndClient.Address.ToString() + ":" + ipEndClient.Port.ToString());
-        //Á¬½Ó³É¹¦Ôò·¢ËÍÊı¾İ
+        //è¿æ¥æˆåŠŸåˆ™å‘é€æ•°æ®
         sendStr = "Welcome to my server";
         SocketSend(sendStr);
     }
 
     public void SocketSend(string sendStr)
     {
-        //Çå¿Õ·¢ËÍ»º´æ
+        //æ¸…ç©ºå‘é€ç¼“å­˜
         sendData = new byte[4096];
-        //Êı¾İÀàĞÍ×ª»»
+        //æ•°æ®ç±»å‹è½¬æ¢
         sendData = Encoding.ASCII.GetBytes(sendStr);
-        //·¢ËÍ
+        //å‘é€
         clientSocket.Send(sendData, sendData.Length, SocketFlags.None);
+    }
+
+    public bool isLargeDataValid()
+    {
+        return (largeData != null && largeData.Length > 2500) || largeDatas.Count > 0;
     }
 
     public int GetLargeDatasCount()
@@ -92,26 +97,26 @@ public class TcpServer : MonoBehaviour
         // return largeDatas.Dequeue();
     }
 
-    byte[] largeData;
+    public byte[] largeData;
 
     MemoryStream ms = null;
     public int readTimes = 0;
     
-    //·şÎñÆ÷½ÓÊÕ
+    //æœåŠ¡å™¨æ¥æ”¶
     void SocketReceiveImage()
     {
-        //Á¬½Ó
+        //è¿æ¥
         SocketConnect();
-        //½øÈë½ÓÊÕÑ­»·
+        //è¿›å…¥æ¥æ”¶å¾ªç¯
         while (true)
         {
-            //¶ÔdataÇåÁã
+            //å¯¹dataæ¸…é›¶
             recvData = new byte[1024 * 1024 * 10];
-            //»ñÈ¡ÊÕµ½µÄÊı¾İµÄ³¤¶È
+            //è·å–æ”¶åˆ°çš„æ•°æ®çš„é•¿åº¦
             recvLen = clientSocket.Receive(recvData);
             // Debug.Log("Received data from client: " + recvLen);
 
-            //Èç¹ûÊÕµ½µÄÊı¾İ³¤¶ÈÎª0£¬ÔòÖØÁ¬²¢½øÈëÏÂÒ»¸öÑ­»·
+            //å¦‚æœæ”¶åˆ°çš„æ•°æ®é•¿åº¦ä¸º0ï¼Œåˆ™é‡è¿å¹¶è¿›å…¥ä¸‹ä¸€ä¸ªå¾ªç¯
             if (recvLen == 0)
             {
                 SocketConnect();
@@ -133,22 +138,22 @@ public class TcpServer : MonoBehaviour
         }
     }
 
-    //Á¬½Ó¹Ø±Õ
+    //è¿æ¥å…³é—­
     void SocketQuit()
     {
         IsConnected = false;
 
-        //ÏÈ¹Ø±Õ¿Í»§¶Ë
+        //å…ˆå…³é—­å®¢æˆ·ç«¯
         if (clientSocket != null)
             clientSocket.Close();
-        //ÔÙ¹Ø±ÕÏß³Ì
+        //å†å…³é—­çº¿ç¨‹
         if (connectThread != null)
         {
             connectThread.Interrupt();
             connectThread.Abort();
         }
 
-        //×îºó¹Ø±Õ·şÎñÆ÷
+        //æœ€åå…³é—­æœåŠ¡å™¨
         serverSocket.Close();
         print("diconnect");
     }

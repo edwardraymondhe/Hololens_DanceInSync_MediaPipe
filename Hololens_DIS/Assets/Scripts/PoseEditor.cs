@@ -359,7 +359,7 @@ public class PoseEditor: MonoBehaviour, IDragHandler, IEndDragHandler, IPointerD
         if (0 <= insertIdx && insertIdx < edittingPoseSequence.poseFrames.Count)
             edittingPoseSequence.Insert(insertIdx, insertPoseFrame, angle, velocity);
         else
-            edittingPoseSequence.Add(insertPoseFrame);
+            edittingPoseSequence.Add(insertPoseFrame, true);
 
         // Re-link all the UIs
         GameObject lastItem = null;
