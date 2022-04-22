@@ -16,6 +16,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
 
     public List<BasePrepareStageController> basePrepareControllers = new List<BasePrepareStageController>();
     public List<BaseTrainStageController> baseTrainControllers = new List<BaseTrainStageController>();
+    public List<BaseReviewStageController> baseReviewControllers = new List<BaseReviewStageController>();
 
     public GameObject screenObjectCollection;
 
@@ -25,6 +26,88 @@ public class GlobalController : GlobalSingleTon<GlobalController>
             SetStage(0);
     }
 
+    #region General Stage Control
+    public void SetStage(int idx)
+    {
+        stage = idx;
+
+        switch (stage)
+        {
+            case 0:
+                SetPrepareStage<MusicStageController>();
+                break;
+            case 1:
+                SetPrepareStage<PoseStageController>();
+                break;
+            case 2:
+                var modeStage = SetPrepareStage<ModeStageController>();
+                modeStage.Init();
+                break;
+            case 3:
+                var mode_tweak = GetPrepareStage<ModeStageController>();
+                var pose_tweak = GetPrepareStage<PoseStageController>();
+                var tweakStage = SetPrepareStage<TweakStageController>();
+                tweakStage.Init(mode_tweak, pose_tweak);
+                break;
+            case 4:
+                var mode_train = GetPrepareStage<ModeStageController>();
+                if (mode_train.isRhythmMode)
+                {
+                    var trainStage = SetTrainStage<RhythmTrainStageController>();
+                    trainStage.StartStage();
+                }
+                else
+                {
+                    // TODO: Stamina Mode
+                }
+
+                // TODO: Sets corresponding near menu buttons
+                // TODO: Sets corresponding hand menu buttons
+
+                break;
+            case 5:
+                var mode_review = GetPrepareStage<ModeStageController>();
+
+                if (mode_review.isRhythmMode)
+                {
+                    var review_train = GetTrainStage<RhythmTrainStageController>();
+                    var reviewStage = SetReviewStage<RhythmReviewStageController>();
+                    reviewStage.Init(review_train);
+                }
+                else
+                {
+                    // TODO: Stamina Mode
+                }
+
+                // TODO: Sets corresponding near menu buttons
+                // TODO: Sets corresponding hand menu buttons
+
+                break;
+            default:
+                break;
+        }
+
+        screenObjectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
+    }
+    public void PrevStage()
+    {
+        stage--;
+        if (stage < 0)
+            return;
+
+        SetStage(stage);
+    }
+    public void NextStage()
+    {
+        stage++;
+        if (stage > 5)
+            return;
+
+        SetStage(stage);
+    }
+    #endregion
+
+    #region Prepare Stage Control
     public T GetPrepareStage<T>() where T : BasePrepareStageController
     {
         BasePrepareStageController foundStageController = null;
@@ -36,7 +119,6 @@ public class GlobalController : GlobalSingleTon<GlobalController>
 
         return foundStageController as T;
     }
-
     private T SetPrepareStage<T>() where T : BasePrepareStageController
     {
         BasePrepareStageController foundStageController = null;
@@ -52,10 +134,18 @@ public class GlobalController : GlobalSingleTon<GlobalController>
         }
 
         CloseTrainStage();
+        CloseReviewStage();
 
         return foundStageController as T;
     }
+    private void ClosePrepareStage()
+    {
+        foreach (var stageController in basePrepareControllers)
+            stageController.gameObject.SetActive(false);
+    }
+    #endregion
 
+    #region Train Stage Control
     public T GetTrainStage<T>() where T : BaseTrainStageController
     {
         BaseTrainStageController foundStageController = null;
@@ -67,7 +157,6 @@ public class GlobalController : GlobalSingleTon<GlobalController>
 
         return foundStageController as T;
     }
-
     private T SetTrainStage<T>() where T : BaseTrainStageController
     {
         BaseTrainStageController foundStageController = null;
@@ -83,93 +172,77 @@ public class GlobalController : GlobalSingleTon<GlobalController>
         }
 
         ClosePrepareStage();
+        CloseReviewStage();
 
         return foundStageController as T;
     }
-
     private void CloseTrainStage()
     {
         foreach (var stageController in baseTrainControllers)
             stageController.gameObject.SetActive(false);
     }
-
-    private void ClosePrepareStage()
+    public void RestartTrain()
     {
-        foreach (var stageController in basePrepareControllers)
-            stageController.gameObject.SetActive(false);
+        InitializeTrain();
+        SetStage(4);
     }
-
-    public void SetStage(int idx)
+    public void FromTrainToMusic()
     {
-        stage = idx;
-
-        Debug.Log(stage);
-        switch (stage)
+        InitializeTrain();
+        SetStage(0);
+    }
+    private void InitializeTrain()
+    {
+        var modeStage = GetPrepareStage<ModeStageController>();
+        if (modeStage.isRhythmMode)
         {
-            case 0:
-                SetPrepareStage<MusicStageController>();
-                break;
-            case 1:
-                SetPrepareStage<PoseStageController>();
-                break;
-            case 2:
-                var modeStage = SetPrepareStage<ModeStageController>();
-                modeStage.Init();
-                break;
-            case 3:
-                var mode = GetPrepareStage<ModeStageController>();
-                var pose = GetPrepareStage<PoseStageController>();
-                var tweakStage = SetPrepareStage<TweakStageController>();
-                tweakStage.Init(mode, pose);
-                break;
-            case 4:
-                Debug.Log("Setting training mode");
+            var trainStage = SetTrainStage<RhythmTrainStageController>();
+            trainStage.InitializeStage();
+        }
+        else
+        {
+            // TODO: Stamina Mode
+        }
+    }
+    #endregion
 
-                var fin_mode = GetPrepareStage<ModeStageController>();
-                Debug.Log("Getting mode stage");
-                if (fin_mode.isRhythmMode)
-                {
-                    Debug.Log("Setting rhythm mode");
-                    SetTrainStage<RhythmStageController>();
-                }
-                else
-                {
-                }
-                break;
-            
-            default:
-                break;
+    #region Review Stage Control
+    public T GetReviewStage<T>() where T : BaseReviewStageController
+    {
+        BaseReviewStageController foundStageController = null;
+        foreach (var stageController in baseReviewControllers)
+        {
+            if (stageController is T)
+                return stageController as T;
         }
 
-        screenObjectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
+        return foundStageController as T;
     }
-
-
-    public void PrevStage()
+    private T SetReviewStage<T>() where T : BaseReviewStageController
     {
-        stage--;
-        if (stage < 0)
-            return;
+        BaseReviewStageController foundStageController = null;
+        foreach (var stageController in baseReviewControllers)
+        {
+            if (stageController is T)
+            {
+                foundStageController = stageController;
+                stageController.gameObject.SetActive(true);
+            }
+            else
+                stageController.gameObject.SetActive(false);
+        }
 
-        SetStage(stage);
+        ClosePrepareStage();
+        CloseTrainStage();
+
+        return foundStageController as T;
     }
-
-    public void NextStage()
+    private void CloseReviewStage()
     {
-        stage++;
-        if (stage > basePrepareControllers.Count + basePrepareControllers.Count - 1)
-            return;
-
-        SetStage(stage);
+        foreach (var stageController in baseReviewControllers)
+            stageController.gameObject.SetActive(false);
     }
+    #endregion
 
-    public class PoseSequenceRuntimeData
-    {
-        public float startTime;
-        public float duration;
-        public PoseSequenceRuntimeData() { }
-        public PoseSequenceRuntimeData(float startTime, float duration) { this.startTime = startTime; this.duration = duration; }
-    }
 
-    public Dictionary<PoseSequence, PoseSequenceRuntimeData> runtimeData = new Dictionary<PoseSequence, PoseSequenceRuntimeData>(); 
 }

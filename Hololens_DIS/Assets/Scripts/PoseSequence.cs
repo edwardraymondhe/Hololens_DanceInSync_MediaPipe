@@ -115,3 +115,13 @@ public class PoseSequence : ScriptableBase
         }
     }
 }
+
+[System.Serializable]
+public class TrainModeData
+{
+    public PoseSequence poseSequence;
+    public float value;
+
+    public TrainModeData() { }
+    public TrainModeData(PoseSequence poseSequence, float value) { this.poseSequence = poseSequence; this.value = value; }
+}

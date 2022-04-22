@@ -8,7 +8,7 @@ public class TweakStageController : BasePrepareStageController
     public GameObject staminaSettingPrefab;
     public GameObject musicSettingPrefab;
 
-    public List<KeyValuePair<PoseSequence, float>> rhythmModeData = new List<KeyValuePair<PoseSequence, float>>();
+    public List<TrainModeData> rhythmModeData = new List<TrainModeData>();
     // public Dictionary<PoseSequence, float> rhythmModeData = new Dictionary<PoseSequence, float>();
 
     public Dictionary<PoseSequence, bool> staminaModeData = new Dictionary<PoseSequence, bool>();
@@ -48,7 +48,7 @@ public class TweakStageController : BasePrepareStageController
         int index = 0;
         foreach (var item in rhythmModeData)
         {
-            if (item.Key == poseSequence)
+            if (item.poseSequence == poseSequence)
             {
                 found = true;
                 break;
@@ -57,9 +57,9 @@ public class TweakStageController : BasePrepareStageController
         }
 
         if (found)
-            rhythmModeData[index] = new KeyValuePair<PoseSequence, float>(poseSequence, value);
+            rhythmModeData[index] = new TrainModeData(poseSequence, value);
         else
-            rhythmModeData.Add(new KeyValuePair<PoseSequence, float>(poseSequence, value));
+            rhythmModeData.Add(new TrainModeData(poseSequence, value));
     }
 
     public void SetModeData<T>(Dictionary<PoseSequence, T> dict, PoseSequence poseSequence, T value)
