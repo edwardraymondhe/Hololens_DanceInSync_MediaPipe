@@ -88,6 +88,8 @@ public class PoseSequence : ScriptableBase
         {
             currentPoseFrame = poseFrame;
             currentPoseFrame.UpdateParams(lastPoseFrame, currentPoseFrame.duration);
+
+            lastPoseFrame = currentPoseFrame;
         }
     }
 
@@ -108,6 +110,8 @@ public class PoseSequence : ScriptableBase
         {
             currentPoseFrame = poseFrame;
             currentPoseFrame.UpdateParams(lastPoseFrame, currentPoseFrame.duration);
+
+            lastPoseFrame = currentPoseFrame;
         }
     }
 }

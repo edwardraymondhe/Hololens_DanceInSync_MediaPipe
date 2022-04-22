@@ -14,20 +14,21 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     /// </summary>
     public int stage = 0;
 
-    public List<BasePrepareStageController> baseStageControllers = new List<BasePrepareStageController>();
+    public List<BasePrepareStageController> basePrepareControllers = new List<BasePrepareStageController>();
+    public List<BaseTrainStageController> baseTrainControllers = new List<BaseTrainStageController>();
 
     public GameObject screenObjectCollection;
 
     private void Start()
     {
-        if (SceneManager.GetActiveScene().name == "MRTK")
+        if (SceneManager.GetActiveScene().name.Contains("MRTK"))
             SetStage(0);
     }
 
-    public T GetStage<T>() where T : BasePrepareStageController
+    public T GetPrepareStage<T>() where T : BasePrepareStageController
     {
         BasePrepareStageController foundStageController = null;
-        foreach (var stageController in baseStageControllers)
+        foreach (var stageController in basePrepareControllers)
         {
             if (stageController is T)
                 return stageController as T;
@@ -36,10 +37,10 @@ public class GlobalController : GlobalSingleTon<GlobalController>
         return foundStageController as T;
     }
 
-    private T SetStage<T>() where T : BasePrepareStageController
+    private T SetPrepareStage<T>() where T : BasePrepareStageController
     {
         BasePrepareStageController foundStageController = null;
-        foreach (var stageController in baseStageControllers)
+        foreach (var stageController in basePrepareControllers)
         {
             if (stageController is T)
             {
@@ -50,31 +51,92 @@ public class GlobalController : GlobalSingleTon<GlobalController>
                 stageController.gameObject.SetActive(false);
         }
 
+        CloseTrainStage();
+
         return foundStageController as T;
+    }
+
+    public T GetTrainStage<T>() where T : BaseTrainStageController
+    {
+        BaseTrainStageController foundStageController = null;
+        foreach (var stageController in baseTrainControllers)
+        {
+            if (stageController is T)
+                return stageController as T;
+        }
+
+        return foundStageController as T;
+    }
+
+    private T SetTrainStage<T>() where T : BaseTrainStageController
+    {
+        BaseTrainStageController foundStageController = null;
+        foreach (var stageController in baseTrainControllers)
+        {
+            if (stageController is T)
+            {
+                foundStageController = stageController;
+                stageController.gameObject.SetActive(true);
+            }
+            else
+                stageController.gameObject.SetActive(false);
+        }
+
+        ClosePrepareStage();
+
+        return foundStageController as T;
+    }
+
+    private void CloseTrainStage()
+    {
+        foreach (var stageController in baseTrainControllers)
+            stageController.gameObject.SetActive(false);
+    }
+
+    private void ClosePrepareStage()
+    {
+        foreach (var stageController in basePrepareControllers)
+            stageController.gameObject.SetActive(false);
     }
 
     public void SetStage(int idx)
     {
         stage = idx;
 
+        Debug.Log(stage);
         switch (stage)
         {
             case 0:
-                SetStage<MusicStageController>();
+                SetPrepareStage<MusicStageController>();
                 break;
             case 1:
-                SetStage<PoseStageController>();
+                SetPrepareStage<PoseStageController>();
                 break;
             case 2:
-                var modeStage = SetStage<ModeStageController>();
+                var modeStage = SetPrepareStage<ModeStageController>();
                 modeStage.Init();
                 break;
             case 3:
-                var mode = GetStage<ModeStageController>();
-                var pose = GetStage<PoseStageController>();
-                var tweakStage = SetStage<TweakStageController>();
+                var mode = GetPrepareStage<ModeStageController>();
+                var pose = GetPrepareStage<PoseStageController>();
+                var tweakStage = SetPrepareStage<TweakStageController>();
                 tweakStage.Init(mode, pose);
                 break;
+            case 4:
+                Debug.Log("Setting training mode");
+
+                var fin_mode = GetPrepareStage<ModeStageController>();
+                Debug.Log("Getting mode stage");
+                if (fin_mode.isRhythmMode)
+                {
+                    Debug.Log("Setting rhythm mode");
+                    SetTrainStage<RhythmStageController>();
+                }
+                else
+                {
+                }
+                break;
+            
             default:
                 break;
         }
@@ -95,7 +157,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     public void NextStage()
     {
         stage++;
-        if (stage > 3)
+        if (stage > basePrepareControllers.Count + basePrepareControllers.Count - 1)
             return;
 
         SetStage(stage);

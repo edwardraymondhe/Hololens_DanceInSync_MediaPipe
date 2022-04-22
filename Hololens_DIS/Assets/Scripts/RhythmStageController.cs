@@ -26,7 +26,7 @@ public class RhythmStageController : BaseTrainStageController
 
         foreach (var keyValuePair in tweakStage.rhythmModeData)
         {
-            var poseSequenceDeepCopy = (PoseSequence)Helper.DeepCopy(keyValuePair);
+            var poseSequenceDeepCopy = (PoseSequence)Helper.DeepCopy(keyValuePair.Key);
             var poseSequenceLength = musicStage.chosenEightBeatDuration * keyValuePair.Value;
             poseSequenceDeepCopy.FitTotalDuration(poseSequenceLength);
 
@@ -35,11 +35,24 @@ public class RhythmStageController : BaseTrainStageController
 
         // Eight beat timer gives the blank-out when an 8Beat is not fully used
         this.eightBeatTimer = (Mathf.Ceil(currSequence.Value) - currSequence.Value) * musicStage.chosenEightBeatDuration;
+
+        // Sets the first poseSequence
+        currSequence = rhythmModeData[0];
+
+        // Manually start the music stage
+        musicStage.audioClipSelector.Replay();
     }
     private bool isEightBeatCountDown = false;
+    private bool isStageOver = false;
 
     protected override void Update()
     {
+        if (isStageOver)
+        {
+            GlobalController.Instance.NextStage();
+            return;
+        }
+
         base.Update();
 
         // TODO: Prepare before song starts
@@ -62,8 +75,12 @@ public class RhythmStageController : BaseTrainStageController
         if (isEightBeatCountDown)
         {
             eightBeatTimer -= Time.deltaTime;
+            Debug.Log("8-Beat-Timer count down: " + eightBeatTimer + " secs");
             if (eightBeatTimer <= 0)
+            {
+                Debug.Log("8-Beat-Timer count down finished.");
                 isEightBeatCountDown = false;
+            }
 
             return;
         }
@@ -85,22 +102,25 @@ public class RhythmStageController : BaseTrainStageController
          */
 
         // Flags to detect whether sequences and frames are found
-        bool isPoseSequenceFound = false;
-        bool isPoseFrameFound = false;
+        bool isSequenceFound = false;
+        bool isFrameFound = false;
+        bool isLastSequence = true;
+        bool isLastFrame = true;
+        float trainedTimerTmp = trainedTimer;
         foreach (var keyValuePair in rhythmModeData)
         {
             // TODO: Get next pose sequence
-            if (isPoseSequenceFound)
+            if (isSequenceFound)
             {
                 nextSequence = keyValuePair;
                 break;
             }
             
             // Decrease the timer by seq's duration if the seq is done, then go for the next seq; else found the in-progress seq, and find frames
-            var tmp = trainedTimer - keyValuePair.Value * musicStage.chosenEightBeatDuration;
+            var tmp = trainedTimerTmp - keyValuePair.Value * musicStage.chosenEightBeatDuration;
             if (tmp > 0)
             {
-                trainedTimer = tmp;
+                trainedTimerTmp = tmp;
                 continue;
             }
 
@@ -108,34 +128,49 @@ public class RhythmStageController : BaseTrainStageController
             foreach (var poseFrame in keyValuePair.Key.poseFrames)
             {
                 // TODO: Get next pose frame
-                if (isPoseFrameFound)
+                if (isFrameFound)
                 {
                     nextFrame = poseFrame;
                     break;
                 }
 
                 // Decrease the timer by frames's duration if the frame is done, then go for the next frame; else found the in-progress frame
-                var leftTrainedTime = trainedTimer - poseFrame.duration;
+                var leftTrainedTime = trainedTimerTmp - poseFrame.duration;
                 if (leftTrainedTime > 0)
                 {
-                    trainedTimer = leftTrainedTime;
+                    trainedTimerTmp = leftTrainedTime;
                     continue;
                 }
 
                 // TODO: Set current pose frame
-                isPoseFrameFound = true;
-                currFrame = poseFrame;
+                isFrameFound = true;
+                if (currFrame != poseFrame)
+                {
+                    isLastFrame = false;
+                    Debug.Log("Frame " + (currFrame == null ? "Null" : currFrame.duration.ToString()) + " -> Frame " + poseFrame.duration);
+                    currFrame = poseFrame;
+                }
             }
 
-            isPoseSequenceFound = true;
+            isSequenceFound = true;
             // If it's a new sequence, setup timer for eightbeat if it's not 8Beat, else don't setup timer
-            if (currSequence.Key != keyValuePair.Key && (keyValuePair.Value % 1.0f != 0.0f))
+            if (currSequence.Key != keyValuePair.Key)
             {
-
-                isEightBeatCountDown = true;
-                eightBeatTimer = musicStage.chosenEightBeatDuration - ((keyValuePair.Value % 1.0f) * musicStage.chosenEightBeatDuration);
+                isLastSequence = false;
+                if (currSequence.Value % 1.0f != 0.0f)
+                {
+                    isEightBeatCountDown = true;
+                    eightBeatTimer = musicStage.chosenEightBeatDuration - ((currSequence.Value % 1.0f) * musicStage.chosenEightBeatDuration);
+                }
+                var first = string.Format("Seq {0}, {1} 8-Beats, {2}", currSequence.Key.fileName, currSequence.Value, isEightBeatCountDown?("Bad 8-Beat! 8-Beat-Timer start: " + eightBeatTimer + " secs"):"All clear");
+                var middle = string.Format("\nat {0} ->\n", trainedTimer);
+                var second = string.Format("Seq {0}, {1} 8-Beats", keyValuePair.Key.fileName, keyValuePair.Value);
+                Debug.Log(first + middle + second);
+                currSequence = keyValuePair;
             }
-            currSequence = keyValuePair;
         }
+
+        if (isLastFrame)
+            isStageOver = true;
     }
 }

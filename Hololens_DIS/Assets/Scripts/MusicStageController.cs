@@ -37,7 +37,7 @@ public class MusicStageController : BasePrepareStageController
     
     public AudioClipSelector audioClipSelector;
     public float chosenEightBeatDuration = 0.0f;
-    public int chosenStartEightBeat = 4;
+    public int chosenStartEightBeat = 2;    // Number of 8-beat to skip after start time
     public float chosenStartTime = 0.0f; 
     
     public async void SetMusic(int index)
@@ -65,8 +65,8 @@ public class MusicStageController : BasePrepareStageController
             rhythmData.GetFeatures(beats, startTime, endTime);
 
             // Get total of x beats (x % 8 == 0)
-            int totalEightBeatCount = 2;
-            int chosenEightBeatIndex = 2;
+            int totalEightBeatCount = 2;    // First get 8*count amount of beats
+            int chosenEightBeatIndex = 2;   // Select the second 8-beat to get their duration, which should never be one
             float currentEightBeatDuration = 0.0f;
 
             // |-1|---(0)---1---2---3---4---5---6---|7|---(8)---9---10---11---12---13---14---|15|---(16)

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Microsoft.MixedReality.Toolkit.Utilities;
 
 public class TweakStageController : BasePrepareStageController
 {
@@ -78,7 +79,7 @@ public class TweakStageController : BasePrepareStageController
 
         foreach (var poseSequence in poseStageController.poseSequences)
         {
-            if (modeStageController.isMusicMode)
+            if (modeStageController.isRhythmMode)
             {
                 var tweakMusicSettingItem = Instantiate(musicSettingPrefab, objectCollection.transform);
                 tweakMusicSettingItem.GetComponent<MusicTweakSettingItem>().Init(this, poseSequence);
@@ -90,5 +91,7 @@ public class TweakStageController : BasePrepareStageController
             }
             index++;
         }
+
+        objectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
     }
 }

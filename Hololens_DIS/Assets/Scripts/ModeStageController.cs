@@ -8,17 +8,17 @@ public class ModeStageController : BasePrepareStageController
     public GameObject chosenObjectPrefab;
     public GameObject chosenObjectGridCollection;
     public List<PoseSequence> poseSequences = new List<PoseSequence>();
-    public bool isMusicMode = true;
+    public bool isRhythmMode = true;
     PoseStageController poseStageController;
 
     private void Start()
     {
-        poseStageController = GlobalController.Instance.GetStage<PoseStageController>();
+        poseStageController = GlobalController.Instance.GetPrepareStage<PoseStageController>();
     }
 
     public void SetStage(bool isMusicMode)
     {
-        this.isMusicMode = isMusicMode;
+        this.isRhythmMode = isMusicMode;
         NextStage();
     }
 

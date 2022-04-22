@@ -15,7 +15,7 @@ public abstract class BaseTrainStageController : MonoBehaviour
     protected ModeStageController modeStage;
     [SerializeField]
     protected TweakStageController tweakStage;
-
+    [SerializeField]
     protected float time = 0.0f;
 
     protected virtual void Awake()
@@ -35,11 +35,29 @@ public abstract class BaseTrainStageController : MonoBehaviour
 
     private void GetPrepareStageControllers()
     {
-        musicStage = GlobalController.Instance.GetStage<MusicStageController>();
-        poseStage = GlobalController.Instance.GetStage<PoseStageController>();
-        modeStage = GlobalController.Instance.GetStage<ModeStageController>();
-        tweakStage = GlobalController.Instance.GetStage<TweakStageController>();
+        musicStage = GlobalController.Instance.GetPrepareStage<MusicStageController>();
+        poseStage = GlobalController.Instance.GetPrepareStage<PoseStageController>();
+        modeStage = GlobalController.Instance.GetPrepareStage<ModeStageController>();
+        tweakStage = GlobalController.Instance.GetPrepareStage<TweakStageController>();
 
         audioClipSelector = musicStage.audioClipSelector;
+    }
+
+    public void Pause()
+    {
+        audioClipSelector.PauseSong();
+    }
+
+    public void UnPause()
+    {
+        audioClipSelector.UnPauseSong();
+    }
+
+    public void TogglePause()
+    {
+        if (audioClipSelector.IsPlaying())
+            audioClipSelector.PauseSong();
+        else
+            audioClipSelector.UnPauseSong();
     }
 }

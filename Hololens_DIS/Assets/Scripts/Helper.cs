@@ -281,8 +281,9 @@ public static class Helper
         }
     }
 
-    public static object DeepCopy(object src)
+    public static T DeepCopy<T>(T src)
     {
+        /*
         MemoryStream ms = new MemoryStream();
         BinaryFormatter bf = new BinaryFormatter();
         bf.Serialize(ms, src);
@@ -290,6 +291,12 @@ public static class Helper
         ms.Seek(0, SeekOrigin.Begin);
         object dst = bf.Deserialize(ms);
         ms.Close();
+        */
+        // Format to binary
+        
+        var json = JsonConvert.SerializeObject(src);
+        T dst = JsonConvert.DeserializeObject<T>(json);
+
         return dst;
     }
 

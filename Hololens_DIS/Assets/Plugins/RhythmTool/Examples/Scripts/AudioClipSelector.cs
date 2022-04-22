@@ -34,6 +34,11 @@ namespace RhythmTool.Examples
             //Stop playing.
             player.Stop();
         }
+
+        public virtual bool IsPlaying()
+        {
+            return player.isPlaying;
+        }
     }
 
     /// <summary>
@@ -101,6 +106,11 @@ namespace RhythmTool.Examples
 
             while (!analyzer.isDone)
                 await Task.Yield();
+        }
+
+        public void Replay()
+        {
+            player.time = 0.0f;
         }
 
         public AudioClip GetSong()

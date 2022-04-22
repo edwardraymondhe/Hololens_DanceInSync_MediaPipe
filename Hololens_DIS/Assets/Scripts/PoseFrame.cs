@@ -69,8 +69,10 @@ public class PoseFrame : ScriptableBase
     {
         foreach (var bonePair in bonePairs)
         {
-            var lastFrameBonePair = lastPoseFrame.bonePairs.Find(e => e.bonePairLink.Equals(bonePair.bonePairLink));
-            bonePair.bonePairStatus.velocity = (bonePair.bonePairStatus.angle - (lastFrameBonePair == null ? bonePair.bonePairStatus.angle : lastFrameBonePair.bonePairStatus.angle)) / (duration);
+            BonePair lastFrameBonePair = null;
+            if (lastPoseFrame != null)
+                lastFrameBonePair = lastPoseFrame.bonePairs.Find(e => e.bonePairLink.Equals(bonePair.bonePairLink));
+            bonePair.bonePairStatus.velocity = (bonePair.bonePairStatus.angle - ((lastPoseFrame == null || lastFrameBonePair == null) ? bonePair.bonePairStatus.angle : lastFrameBonePair.bonePairStatus.angle)) / (duration);
         }
 
         this.duration = duration;
