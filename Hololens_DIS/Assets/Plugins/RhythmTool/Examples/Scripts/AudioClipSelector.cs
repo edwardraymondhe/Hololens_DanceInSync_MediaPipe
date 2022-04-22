@@ -12,7 +12,6 @@ namespace RhythmTool.Examples
     {
         public RhythmAnalyzer analyzer;
         public RhythmPlayer player;
-        
         public virtual void PauseSong()
         {
             player.Pause();
@@ -106,11 +105,14 @@ namespace RhythmTool.Examples
 
             while (!analyzer.isDone)
                 await Task.Yield();
+
+            Play();
         }
 
-        public void Replay()
+        public void Play()
         {
             player.time = 0.0f;
+            player.Play();
         }
 
         public AudioClip GetSong()

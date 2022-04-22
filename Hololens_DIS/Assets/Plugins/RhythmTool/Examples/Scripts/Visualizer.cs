@@ -90,7 +90,7 @@ namespace RhythmTool.Examples
         private void OnInitialized(RhythmData rhythmData)
         {
             //Start playing the song.
-            player.Play();
+            //player.Play();
         }
 
         private void OnReset()
