@@ -10,7 +10,7 @@ public class PoseStageController : BasePrepareStageController
     public GameObject chosenObjectGridCollection;
     public List<PoseSequence> poseSequences = new List<PoseSequence>();
 
-    private void Start()
+    public override void InitStage(bool acrossStage)
     {
         SpawnCollection();
     }
@@ -29,7 +29,7 @@ public class PoseStageController : BasePrepareStageController
             index++;
         }
 
-        objectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
+        StartCoroutine(RefreshCollection(objectCollection));
     }
 
     public void AddPose(PoseSequence poseSequence)
@@ -46,7 +46,7 @@ public class PoseStageController : BasePrepareStageController
         for (int i = chosenObjectGridCollection.transform.childCount - 1; i >= 0; i--)
             chosenObjectGridCollection.transform.GetChild(i).GetComponent<PoseStageChosenItem>().UpdateIndex();
 
-        chosenObjectGridCollection.GetComponent<GridObjectCollection>().UpdateCollection();
+        StartCoroutine(RefreshCollection(chosenObjectGridCollection));
     }
 
     public void RemovePoseAtIndex(int idx)

@@ -21,16 +21,8 @@ public class RhythmTrainStageController : BaseTrainStageController
     [SerializeField]
     private bool isStageOver = false;
 
-    [SerializeField]
-    private int currSeqIndex = 0;
-    [SerializeField]
-    private int currFrameIndex = 0;
-
-
     public override void StartStage()
     {
-        base.StartStage();
-
         /*
          * TODO:
          * 1. Create a new deep copy dictionary for sequence that holds all the infomation
@@ -46,7 +38,7 @@ public class RhythmTrainStageController : BaseTrainStageController
         }
 
         // Eight beat timer gives the blank-out when an 8Beat is not fully used
-        this.eightBeatTimer = (Mathf.Ceil(currSequence.value) - currSequence.value) * musicStage.chosenEightBeatDuration;
+        // this.eightBeatTimer = (Mathf.Ceil(currSequence.value) - currSequence.value) * musicStage.chosenEightBeatDuration;
 
         // Sets the first poseSequence
         // currSequence = rhythmModeData[0];
@@ -54,11 +46,13 @@ public class RhythmTrainStageController : BaseTrainStageController
 
         // Manually start the music stage
         musicStage.audioClipSelector.Play();
+
+        base.StartStage();
     }
 
-    public override void InitializeStage()
+    public override void InitStage()
     {
-        base.InitializeStage();
+        base.InitStage();
 
         processedTimer = 0.0f;
         eightBeatTimer = 0.0f;
@@ -69,9 +63,7 @@ public class RhythmTrainStageController : BaseTrainStageController
         nextFrame = null;
         isEightBeatCountDown = false;
         isStageOver = false;
-
-        currFrameIndex = 0;
-        currSeqIndex = 0;
+        rhythmModeData.Clear();
     }
 
     protected override void Update()
@@ -168,9 +160,9 @@ public class RhythmTrainStageController : BaseTrainStageController
 
             Debug.Log("In this seq.");
             // If it's a new sequence, setup timer for eightbeat if it's not 8Beat, else don't setup timer
-            if (currSequence.poseSequence != keyValuePair.poseSequence)
+            if (currSequence != keyValuePair)
             {
-                if (currSequence.poseSequence != null)
+                if (currSequence != null && currSequence.poseSequence != null)
                 {
                     if (currSequence.value % 1.0f != 0.0f)
                     {
@@ -190,8 +182,6 @@ public class RhythmTrainStageController : BaseTrainStageController
                 else
                     nextSequence = null;
 
-                currSeqIndex = seqIndex;
-                currFrameIndex = -1;
             }
 
             // TODO: Set current pose sequence
@@ -224,8 +214,6 @@ public class RhythmTrainStageController : BaseTrainStageController
                         nextFrame = keyValuePair.poseSequence.poseFrames[frameIndex + 1];
                     else
                         nextFrame = null;
-
-                    currFrameIndex = frameIndex;
                 }
                 
                 break;

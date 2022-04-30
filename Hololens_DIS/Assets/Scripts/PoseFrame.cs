@@ -60,7 +60,10 @@ public class PoseFrame : ScriptableBase
             float angle = BonePairLink.GetAngle(positions[0], positions[1], positions[2]);
             bonePair.bonePairStatus.angle = angle;
             var lastFrameBonePair = lastPoseFrame.bonePairs.Find(e => e.bonePairLink.Equals(bonePair.bonePairLink));
-            bonePair.bonePairStatus.velocity = (angle - (lastFrameBonePair == null ? angle : lastFrameBonePair.bonePairStatus.angle)) / (duration);
+            var velocity = (angle - (lastFrameBonePair == null ? angle : lastFrameBonePair.bonePairStatus.angle)) / (duration);
+            var dir = positions[2] - positions[1];
+            bonePair.bonePairStatus.velocity = velocity;
+            bonePair.bonePairStatus.dir = dir;
         }
         this.duration = duration;
     }

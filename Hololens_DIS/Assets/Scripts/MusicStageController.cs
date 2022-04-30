@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 
 public class MusicStageController : BasePrepareStageController
 {
-    private void Start()
+    public override void InitStage(bool acrossStage)
     {
         SpawnCollection();
-        SetMusic(0);
+        if (acrossStage)
+            SetMusic(0);
     }
 
     private void Update()
@@ -30,7 +31,7 @@ public class MusicStageController : BasePrepareStageController
             index++;
         }
 
-        objectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
+        StartCoroutine(RefreshCollection(objectCollection));
     }
 
     #region Music Mode

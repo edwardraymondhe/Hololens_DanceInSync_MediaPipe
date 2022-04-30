@@ -101,7 +101,7 @@ public class BonePairLink
     public override bool Equals(object obj)
     {
         BonePairLink b = obj as BonePairLink;
-        //¶Ô±äÁ¿µÄËùÓĞµÄÊôĞÔ¶¼Òª½øĞĞ±È½Ï  Ö»ÓĞ¶¼ÏàÍ¬²Å·µ»Øtrue
+        //å¯¹å˜é‡çš„æ‰€æœ‰çš„å±æ€§éƒ½è¦è¿›è¡Œæ¯”è¾ƒ  åªæœ‰éƒ½ç›¸åŒæ‰è¿”å›true
         if (firstBone == b.firstBone && secondBone == b.secondBone)
             return true;
         else
@@ -122,6 +122,8 @@ public class BonePairStatus
 {
     public float angle = 0.0f;
     public float velocity = 0.0f;
+
+    public Vector3 dir = new Vector3(0, 0, 0);
     public BonePairStatus() { }
     public BonePairStatus(float ang, float vel) { angle = ang; velocity = vel; }
 }

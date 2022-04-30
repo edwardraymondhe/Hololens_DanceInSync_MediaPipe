@@ -18,7 +18,7 @@ public class TweakStageController : BasePrepareStageController
     PoseStageController poseStageController;
     ModeStageController modeStageController;
 
-    public void Init(ModeStageController modeStageController, PoseStageController poseStageController)
+    public void InitStage(bool acrossStage, ModeStageController modeStageController, PoseStageController poseStageController)
     {
         this.poseStageController = poseStageController;
         this.modeStageController = modeStageController;
@@ -91,7 +91,7 @@ public class TweakStageController : BasePrepareStageController
             }
             index++;
         }
-
-        objectCollection.GetComponent<GridObjectCollection>().UpdateCollection();
+     
+        StartCoroutine(RefreshCollection(objectCollection));
     }
 }

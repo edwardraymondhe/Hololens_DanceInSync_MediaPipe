@@ -176,7 +176,23 @@ public class IpCamera : MonoBehaviour
             stream.ReadByte(); // LF after bytes
         }
     }
+    public float mockWidth = 720;
+    public float mockHeight = 1280;
 
+    public float GetWidthFactor()
+    {
+        return ((streamImage.texture.width == 0) ? mockWidth : streamImage.texture.width) * xyFactor;
+    }
+
+    public float GetHeightFactor()
+    {
+        return ((streamImage.texture.height == 0) ? mockHeight : streamImage.texture.height) * xyFactor;
+    }
+
+    public float GetDepthFactor()
+    {
+        return zFactor;
+    }
     int FindLength(Stream stream)
     {
         int b;

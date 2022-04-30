@@ -6,7 +6,7 @@ public class RhythmReviewStageController : BaseReviewStageController
 {
     private RhythmTrainStageController rhythmStageController;
 
-    public override void Init<T>(T trainStageController)
+    public override void InitStage<T>(T trainStageController)
     {
         rhythmStageController = trainStageController as RhythmTrainStageController;
     }

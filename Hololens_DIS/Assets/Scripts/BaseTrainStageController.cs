@@ -32,19 +32,19 @@ public abstract class BaseTrainStageController : MonoBehaviour
 
     public virtual void StartStage()
     {
+        initialized = true;
+    }
+
+    public virtual void InitStage()
+    {
         musicStage = GlobalController.Instance.GetPrepareStage<MusicStageController>();
         poseStage = GlobalController.Instance.GetPrepareStage<PoseStageController>();
         modeStage = GlobalController.Instance.GetPrepareStage<ModeStageController>();
         tweakStage = GlobalController.Instance.GetPrepareStage<TweakStageController>();
-
         audioClipSelector = musicStage.audioClipSelector;
 
-        initialized = true;
-    }
-
-    public virtual void InitializeStage()
-    {
         // TODO: Reset all the data
+        audioClipSelector.StopSong();
         initialized = false;
     }
 

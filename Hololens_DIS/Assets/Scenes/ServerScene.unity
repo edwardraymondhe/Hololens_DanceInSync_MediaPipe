@@ -2442,6 +2442,8 @@ MonoBehaviour:
   widthFactor: 0
   heightFactor: 0
   depthFactor: 0
+  mockWidth: 720
+  mockHeight: 1280
 --- !u!1 &428379566
 GameObject:
   m_ObjectHideFlags: 0
@@ -3841,7 +3843,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stage: 0
-  baseStageControllers: []
+  basePrepareControllers: []
+  baseTrainControllers: []
+  baseReviewControllers: []
   screenObjectCollection: {fileID: 0}
 --- !u!4 &720518344
 Transform:
@@ -5926,11 +5930,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1229167092}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4689773fded70954094c42da1b41e1e9, type: 3}
+  m_Script: {fileID: 11500000, guid: 3f12cf30ab77928479e76ace228ebac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  animator: {fileID: 1229167095}
+  server: {fileID: 1576645078}
+  boneOffsets: []
+  boneTransforms: []
+  body: {fileID: 1437851727}
 --- !u!95 &1229167095
 Animator:
   serializedVersion: 3
@@ -5939,9 +5948,9 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1229167092}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 9000000, guid: 5c21f602d4eefcc4dbcdd55321142ed8, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 81dcea8ebff4e42469db1a67938603cd, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 1
@@ -7403,6 +7412,8 @@ MonoBehaviour:
   poseLandmarks:
     landmarks: []
   ReceiveThreadEnd: 0
+  receiveStop: 0
+  humanoidController: {fileID: 1229167094}
   lastPoseFrame: {fileID: 0}
   currentPoseFrame: {fileID: 0}
   isPoseStartRecording: 0

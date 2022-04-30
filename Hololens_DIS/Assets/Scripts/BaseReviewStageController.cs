@@ -7,7 +7,7 @@ public abstract class BaseReviewStageController : MonoBehaviour
 {
     public TMP_Text scoreText;
 
-    public virtual void Init<T>(T trainStageController) where T : BaseTrainStageController
+    public virtual void InitStage<T>(T trainStageController) where T : BaseTrainStageController
     {
     }
 

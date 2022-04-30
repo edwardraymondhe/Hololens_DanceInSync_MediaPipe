@@ -11,19 +11,16 @@ public class ModeStageController : BasePrepareStageController
     public bool isRhythmMode = true;
     PoseStageController poseStageController;
 
-    private void Start()
-    {
-        poseStageController = GlobalController.Instance.GetPrepareStage<PoseStageController>();
-    }
-
     public void SetStage(bool isMusicMode)
     {
         this.isRhythmMode = isMusicMode;
         NextStage();
     }
 
-    public override void Init()
+    public override void InitStage(bool acrossStage)
     {
+        poseStageController = GlobalController.Instance.GetPrepareStage<PoseStageController>();
+
         ClearPose();
 
         this.chosenObjectPrefab = poseStageController.chosenObjectPrefab;
@@ -45,7 +42,7 @@ public class ModeStageController : BasePrepareStageController
         for (int i = chosenObjectGridCollection.transform.childCount - 1; i >= 0; i--)
             chosenObjectGridCollection.transform.GetChild(i).GetComponent<PoseStageChosenItem>().UpdateIndex();
 
-        chosenObjectGridCollection.GetComponent<GridObjectCollection>().UpdateCollection();
+        StartCoroutine(RefreshCollection(chosenObjectGridCollection));
     }
 
     void ClearPose()

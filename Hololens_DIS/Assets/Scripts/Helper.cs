@@ -161,8 +161,10 @@ public static class Helper
                 file = File.Open(filePath, FileMode.Truncate);
             else
                 file = File.Create(filePath);
-
-            var json = JsonConvert.SerializeObject(t);
+            
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            var json = JsonConvert.SerializeObject(t, settings);
             formatter.Serialize(file, json);
             file.Close();
         }
@@ -293,8 +295,9 @@ public static class Helper
         ms.Close();
         */
         // Format to binary
-        
-        var json = JsonConvert.SerializeObject(src);
+        JsonSerializerSettings settings = new JsonSerializerSettings();
+        settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        var json = JsonConvert.SerializeObject(src, settings);
         T dst = JsonConvert.DeserializeObject<T>(json);
 
         return dst;

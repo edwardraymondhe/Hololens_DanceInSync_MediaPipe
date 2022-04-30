@@ -12,7 +12,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     /// 2: Mode
     /// 3: Tweak
     /// </summary>
-    public int stage = 0;
+    public int stage = -1;
 
     public List<BasePrepareStageController> basePrepareControllers = new List<BasePrepareStageController>();
     public List<BaseTrainStageController> baseTrainControllers = new List<BaseTrainStageController>();
@@ -29,31 +29,42 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     #region General Stage Control
     public void SetStage(int idx)
     {
+        bool acrossStage = false;
+        if ((stage < 0)|| (stage >= 0 && stage <= 3 && idx > 3) || (idx >= 0 && idx <= 3 && stage > 3))
+            acrossStage = true;
+
         stage = idx;
 
         switch (stage)
         {
             case 0:
-                SetPrepareStage<MusicStageController>();
+                var musicStage = SetPrepareStage<MusicStageController>();
+                musicStage.InitStage(acrossStage);
                 break;
+
             case 1:
-                SetPrepareStage<PoseStageController>();
+                var poseStage = SetPrepareStage<PoseStageController>();
+                poseStage.InitStage(acrossStage);
                 break;
+
             case 2:
                 var modeStage = SetPrepareStage<ModeStageController>();
-                modeStage.Init();
+                modeStage.InitStage(acrossStage);
                 break;
+
             case 3:
                 var mode_tweak = GetPrepareStage<ModeStageController>();
                 var pose_tweak = GetPrepareStage<PoseStageController>();
                 var tweakStage = SetPrepareStage<TweakStageController>();
-                tweakStage.Init(mode_tweak, pose_tweak);
+                tweakStage.InitStage(acrossStage, mode_tweak, pose_tweak);
                 break;
+
             case 4:
                 var mode_train = GetPrepareStage<ModeStageController>();
                 if (mode_train.isRhythmMode)
                 {
                     var trainStage = SetTrainStage<RhythmTrainStageController>();
+                    trainStage.InitStage();
                     trainStage.StartStage();
                 }
                 else
@@ -65,6 +76,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
                 // TODO: Sets corresponding hand menu buttons
 
                 break;
+
             case 5:
                 var mode_review = GetPrepareStage<ModeStageController>();
 
@@ -72,7 +84,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
                 {
                     var review_train = GetTrainStage<RhythmTrainStageController>();
                     var reviewStage = SetReviewStage<RhythmReviewStageController>();
-                    reviewStage.Init(review_train);
+                    reviewStage.InitStage(review_train);
                 }
                 else
                 {
@@ -83,6 +95,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
                 // TODO: Sets corresponding hand menu buttons
 
                 break;
+
             default:
                 break;
         }
@@ -183,7 +196,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     }
     public void RestartTrain()
     {
-        InitializeTrain();
+        // InitializeTrain();
         SetStage(4);
     }
     public void FromTrainToMusic()
@@ -197,7 +210,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
         if (modeStage.isRhythmMode)
         {
             var trainStage = SetTrainStage<RhythmTrainStageController>();
-            trainStage.InitializeStage();
+            trainStage.InitStage();
         }
         else
         {

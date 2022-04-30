@@ -34,6 +34,11 @@ namespace RhythmTool.Examples
             player.Stop();
         }
 
+        public virtual void StopSong()
+        {
+            player.Stop();
+        }
+
         public virtual bool IsPlaying()
         {
             return player.isPlaying;
