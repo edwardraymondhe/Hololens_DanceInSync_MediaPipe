@@ -21,6 +21,8 @@ public class RhythmTrainStageController : BaseTrainStageController
     [SerializeField]
     private bool isStageOver = false;
 
+    public HumanoidController humanoid;
+
     public override void StartStage()
     {
         /*
@@ -218,6 +220,9 @@ public class RhythmTrainStageController : BaseTrainStageController
                 
                 break;
             }
+
+            // TODO: If sequence just changed, need to increase lerp
+            humanoid.UpdateByFrame(currFrame);
 
             if (isFrameFound)
             {

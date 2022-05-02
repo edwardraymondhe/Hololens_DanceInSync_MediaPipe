@@ -366,6 +366,9 @@ public class HumanoidController : MonoBehaviour
 
     public void UpdateByFrame(PoseFrame poseFrame, bool instant = false)
     {
+        if (poseFrame == null || poseFrame.boneQuaternions.Count <= 0)
+            return;
+
         float factor = instant ? 1000.0f : this.lerpFactor;
 
         // Root

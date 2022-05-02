@@ -40,7 +40,7 @@ public class MediaPipeClient: MonoBehaviour
 
     public void StartClient()
     {
-        client.InitSocket(Helper.Socket.Ip, Helper.Socket.port);
+        client.InitSocket(GlobalController.Instance.setting.Ip, GlobalController.Instance.setting.port);
     }
 
     IEnumerator SendLandmarks()

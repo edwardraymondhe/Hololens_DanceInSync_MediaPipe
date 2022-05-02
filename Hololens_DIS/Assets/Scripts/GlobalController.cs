@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class GlobalController : GlobalSingleTon<GlobalController>
 {
+    #region Stage
     /// <summary>
     /// 0: Music
     /// 1: Pose
@@ -19,6 +20,29 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     public List<BaseReviewStageController> baseReviewControllers = new List<BaseReviewStageController>();
 
     public GameObject screenObjectCollection;
+    #endregion
+
+    #region Setting
+    public Setting setting = new Setting();
+
+    public class Setting
+    {
+        public int port = 9002;
+        private string ip = "127.0.0.1";
+        public string Ip
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return "127.0.0.1";
+#else
+                return "192.168.0.243";
+#endif
+            }
+        }
+        public float processFPS = 30.0f;
+    }
+    #endregion
 
     private void Start()
     {

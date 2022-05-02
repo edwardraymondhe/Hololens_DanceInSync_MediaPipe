@@ -13,10 +13,10 @@ using UnityEngine.UI;
 /// </summary>
 public class MediaPipeServer: MonoBehaviour
 {
+    #region Server
     public bool runOnStart = false;
     public int frame = 0;
-    public IpCamera ipCamera;
-    public PoseEditor poseEditor;
+
     public Helper.Pose.Landmarks poseLandmarks;
     TcpServer server;
     Helper.StatFile<Helper.StatStruct.ParseData> statParsData;
@@ -26,12 +26,22 @@ public class MediaPipeServer: MonoBehaviour
     byte[] recvData;
 
     public bool receiveStop = false;
+    #endregion
 
-    public float processFPS = 30;
-    public float processTimer;
-    public float currentTimer = 0.0f;
+    #region Humanoid and Pose
+    public HumanoidController humanoid;
+    public PoseFrame lastPoseFrame;
+    public PoseFrame currentPoseFrame;
+    List<Quaternion> quaternions = new List<Quaternion>();
+    List<Vector3> landmarks = new List<Vector3>();
+    public bool useCameraFactor = false;
 
-    public Button addScatterShotButton;
+    public List<int> upper = new List<int> { 14, 16, 18, 20, 22, 13, 15, 17, 19, 21 };
+    public List<int> lower = new List<int> { 26, 28, 30, 32, 25, 27, 29, 31 };
+    public float zUpper = 0.25f;
+    public float zLower = 0.25f;
+    #endregion
+
 
     private void Start()
     {
@@ -40,58 +50,37 @@ public class MediaPipeServer: MonoBehaviour
 
         if (runOnStart)
             StartServer();
-
-        processTimer = 1.0f / processFPS;
     }
 
     private void Update()
     {
-        processTimer = 1.0f / processFPS;
-
         frame++;
 
         if (poseLandmarks.landmarks.Count > 0)
         {
-            currentTimer += Time.deltaTime;
-
             ProcessHumanoid();
-
-            if (currentTimer > processTimer)
-            {
-                ProcessPoseFrame();
-                RecordContinuousSequence();
-                currentTimer = 0.0f;
-            }
-
-            addScatterShotButton.interactable = isScatteredRecording;
+            ProcessPoseFrame();
         }
-        
     }
-    List<Quaternion> quaternions = new List<Quaternion>();
-    public bool useCameraFactor = false;
 
-    public List<int> upper = new List<int> { 14, 16, 18, 20, 22, 13, 15, 17, 19, 21 };
-    public List<int> lower = new List<int> {  26, 28, 30, 32,  25, 27, 29, 31 };
+    public void ProcessPoseFrame()
+    {
+        // Initialize and calculate pose frames
+        if (currentPoseFrame == null)
+            currentPoseFrame = PoseFrame.CreateInstance();
 
-    public float zUpper = 0.25f;
-    public float zLower = 0.25f;
+        lastPoseFrame = currentPoseFrame;
 
+        currentPoseFrame = PoseFrame.CreateInstance(lastPoseFrame, 1.0f / GlobalController.Instance.setting.processFPS, poseLandmarks.landmarks, quaternions, humanoid.x, humanoid.y, humanoid.z);
+    }
     private void ProcessHumanoid()
     {
-        List<Vector3> landmarks = new List<Vector3>();
+        landmarks.Clear();
+
         float x, y, z;
-        if (!useCameraFactor)
-        {
-            x = poseEditor.previewHumanoidController.x;
-            y = poseEditor.previewHumanoidController.y;
-            z = poseEditor.previewHumanoidController.z;
-        }
-        else
-        {
-            x = ipCamera.GetWidthFactor();
-            y = ipCamera.GetHeightFactor();
-            z = ipCamera.GetDepthFactor();
-        }
+        x = humanoid.x;
+        y = humanoid.y;
+        z = humanoid.z;
 
         foreach (var landmark in poseLandmarks.landmarks)
         {
@@ -102,12 +91,12 @@ public class MediaPipeServer: MonoBehaviour
             landmarks.Add(position);
         }
 
-        quaternions = poseEditor.previewHumanoidController.UpdateByRealTime(landmarks);
+        quaternions = humanoid.UpdateByRealTime(landmarks);
     }
 
     public void StartServer()
     {
-        server.InitSocket(Helper.Socket.port, false);
+        server.InitSocket(GlobalController.Instance.setting.port, false);
         ReceiveThread = new Thread(GetLandmarks);
         ReceiveThread.Start();
     }
@@ -131,15 +120,27 @@ public class MediaPipeServer: MonoBehaviour
 
     public void ParseData()
     {
-        Stopwatch sw = new Stopwatch();
-        sw.Start();
+        try
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
-        // TODO: Encode data to landmarks
-        recvData = server.DequeLargeData();
-        string recvDataString = Encoding.UTF8.GetString(recvData, 1, recvData.Length - 2);
+            // TODO: Encode data to landmarks
+            recvData = server.DequeLargeData();
+            string recvDataString = Encoding.UTF8.GetString(recvData, 1, recvData.Length - 2);
 
-        if (receiveStop == false)
-            poseLandmarks = JsonConvert.DeserializeObject<Helper.Pose.Landmarks>(recvDataString);
+            if (receiveStop == false)
+                poseLandmarks = JsonConvert.DeserializeObject<Helper.Pose.Landmarks>(recvDataString);
+
+            sw.Stop();
+            statParsData.AddBuffer(new Helper.StatStruct.ParseData(frame, server.readTimes, server.GetLargeDatasCount(), sw.ElapsedMilliseconds));
+        }
+        catch (JsonReaderException)
+        {
+            Debug.Log("Json Reader Error.");
+            throw;
+        }
+        
 
         /*
         var count_list = Helper.ConvertIntWithCount(recvData);
@@ -175,8 +176,7 @@ public class MediaPipeServer: MonoBehaviour
 
         */
 
-        sw.Stop();
-        statParsData.AddBuffer(new Helper.StatStruct.ParseData(frame, server.readTimes, server.GetLargeDatasCount(), sw.ElapsedMilliseconds));
+        
     }
 
     /*
@@ -213,105 +213,6 @@ public class MediaPipeServer: MonoBehaviour
         streamImage.GetComponent<RectTransform>().sizeDelta = new Vector2(texture2D.width, texture2D.height);
     }
     */
-
-    private void HandleLandmarks(string str)
-    {
-        var deserializedLandmarks = JsonConvert.DeserializeObject<Helper.Pose.Landmarks>(str);
-        Log(deserializedLandmarks.GetString());
-    }
-
-    public void Log(string str)
-    {
-        Debug.Log(str);
-        // landmarkText.text = str;
-    }
-
-    public PoseFrame lastPoseFrame;
-    public PoseFrame currentPoseFrame;
-
-    public PoseRecorder poseRecorder;
-    public bool isContinuousRecordToggled = false;
-    public bool isContinuousRecording = false;
-
-    public void ProcessPoseFrame()
-    {
-        // Initialize and calculate pose frames
-        if (currentPoseFrame == null)
-            currentPoseFrame = PoseFrame.CreateInstance();
-
-        lastPoseFrame = currentPoseFrame;
-
-        currentPoseFrame = PoseFrame.CreateInstance(lastPoseFrame, 1.0f / processFPS, poseLandmarks.landmarks, quaternions, ipCamera.GetWidthFactor(), ipCamera.GetHeightFactor(), ipCamera.GetDepthFactor());
-    }
-
-    public void RecordInstantFrame()
-    {
-        if (poseRecorder == null)
-            poseRecorder = new PoseRecorder();
-
-        poseRecorder.SaveInstantFrame(currentPoseFrame);
-    }
-
-    /// <summary>
-    /// Toggles on/off continous-record, called from UI
-    /// </summary>
-    public void ToggleContinuousRecord()
-    {
-        isContinuousRecordToggled = true;
-    }
-    
-    /// <summary>
-    /// Controls continuous-record flow
-    /// </summary>
-    public void RecordContinuousSequence()
-    {
-        // Pose frames flow control
-        if (isContinuousRecordToggled)
-        {
-            if (!isContinuousRecording)
-                // Initialize a new recorder
-                poseRecorder = new PoseRecorder();
-            else
-            {
-                // Save continous sequence to local
-                poseRecorder.SaveContinuousSequence();
-                poseEditor.RefreshPoseBrowserContent();
-            }
-
-            isContinuousRecording = !isContinuousRecording;
-
-            isContinuousRecordToggled = false;
-        }
-
-        // If currently recording, add current frame
-        if (isContinuousRecording)
-            poseRecorder.AddContinuousFrame(currentPoseFrame);
-    }
-    
-    // Controls scattered record
-    public bool isScatteredRecording = false;
-
-    /// <summary>
-    /// Toggles on/off scattered-record, called from UI
-    /// </summary>
-    public void ToggleScatteredRecord()
-    {
-        if (poseRecorder == null)
-        {
-            poseRecorder = new PoseRecorder();
-            isScatteredRecording = true;
-        }
-        else
-            isScatteredRecording = !isScatteredRecording;         
-    }
-    
-    /// <summary>
-    /// Adds the frame to current scattered sequence, called from UI
-    /// </summary>
-    public void AddScatteredFrame()
-    {
-        poseRecorder.AddScatteredFrame(currentPoseFrame);
-    }
 
     private void OnApplicationQuit()
     {

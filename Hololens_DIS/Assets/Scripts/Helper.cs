@@ -418,6 +418,33 @@ public static class Helper
         return isInView;
     }
 
+    public static void UpdateHumanoidBySequence(ref float currentTimer, ref PoseSequence poseSequence, ref HumanoidController humanoid, float speedFactor)
+    {
+        currentTimer += Time.deltaTime * speedFactor;
+
+        float tmpCurrentTimer = currentTimer;
+        bool foundCurrentFrame = false;
+        foreach (var poseFrame in poseSequence.poseFrames)
+        {
+            // Found the current poseFrame
+            float tmp = tmpCurrentTimer - poseFrame.duration;
+            if (tmp < 0)
+            {
+                humanoid.UpdateByFrame(poseFrame);
+                foundCurrentFrame = true;
+                break;
+            }
+            else
+            {
+                tmpCurrentTimer = tmp;
+            }
+        }
+
+        if (!foundCurrentFrame)
+            currentTimer = -1.0f;
+    }
+
+
     public static class Image
     {
         public static Texture2D Rotate(Texture2D originalTexture, bool clockwise)

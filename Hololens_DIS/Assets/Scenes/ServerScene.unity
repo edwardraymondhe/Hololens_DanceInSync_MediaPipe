@@ -475,8 +475,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1576645078}
-        m_TargetAssemblyTypeName: MediaPipeServer, Assembly-CSharp
+      - m_Target: {fileID: 1576645080}
+        m_TargetAssemblyTypeName: PoseRecordController, Assembly-CSharp
         m_MethodName: RecordInstantFrame
         m_Mode: 1
         m_Arguments:
@@ -1233,9 +1233,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1576645078}
-        m_TargetAssemblyTypeName: MediaPipeServer, Assembly-CSharp
-        m_MethodName: TogglePoseRecording
+      - m_Target: {fileID: 1576645080}
+        m_TargetAssemblyTypeName: PoseRecordController, Assembly-CSharp
+        m_MethodName: ToggleContinuousRecord
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1889,7 +1889,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 40, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &378217802
@@ -3951,7 +3951,6 @@ RectTransform:
   m_Children:
   - {fileID: 609621641}
   - {fileID: 723746572}
-  - {fileID: 1982910127}
   m_Father: {fileID: 1909779762}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4475,22 +4474,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1576645078}
-        m_TargetAssemblyTypeName: MediaPipeServer, Assembly-CSharp
-        m_MethodName: ToggleScatterRecord
+      - m_Target: {fileID: 1576645080}
+        m_TargetAssemblyTypeName: PoseRecordController, Assembly-CSharp
+        m_MethodName: ToggleContinuousRecord
         m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1843384650}
-        m_TargetAssemblyTypeName: UnityEngine.UI.Selectable, UnityEngine.UI
-        m_MethodName: set_interactable
-        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -6052,8 +6039,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1576645079}
   - component: {fileID: 1576645078}
+  - component: {fileID: 1576645080}
   m_Layer: 0
-  m_Name: Socket Server
+  m_Name: MediaPipe Server
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6073,26 +6061,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runOnStart: 1
   frame: 0
-  ipCamera: {fileID: 391452612}
-  poseEditor: {fileID: 1964447627}
   poseLandmarks:
     landmarks: []
   ReceiveThreadEnd: 0
   receiveStop: 0
-  processFPS: 15
-  processTimer: 0
-  currentTimer: 0
-  addScatterShotButton: {fileID: 1843384650}
+  humanoid: {fileID: 1148728636077459213}
+  lastPoseFrame: {fileID: 0}
+  currentPoseFrame: {fileID: 0}
   useCameraFactor: 0
   upper: 0c0000000e000000100000001200000014000000160000000b0000000d0000000f000000110000001300000015000000
   lower: 180000001a0000001c0000001e0000002000000017000000190000001b0000001d0000001f000000
   zUpper: 0.25
   zLower: 0.25
-  lastPoseFrame: {fileID: 0}
-  currentPoseFrame: {fileID: 0}
-  isContinuousRecordToggled: 0
-  isContinuousRecording: 0
-  isScatteredRecording: 0
 --- !u!4 &1576645079
 Transform:
   m_ObjectHideFlags: 0
@@ -6107,6 +6087,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1576645080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1576645077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26d60f4079852984bb189697bf460ec0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  processTimer: 0
+  currentTimer: 0
+  addScatterShotButton: {fileID: 1843384650}
+  ipCamera: {fileID: 391452612}
+  poseEditor: {fileID: 1964447627}
+  server: {fileID: 1576645078}
+  isContinuousRecordToggled: 0
+  isContinuousRecording: 0
+  isScatteredRecording: 0
 --- !u!1 &1580399850
 GameObject:
   m_ObjectHideFlags: 0
@@ -7677,9 +7678,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1576645078}
-        m_TargetAssemblyTypeName: MediaPipeServer, Assembly-CSharp
-        m_MethodName: ToggleScatterRecord
+      - m_Target: {fileID: 1576645080}
+        m_TargetAssemblyTypeName: PoseRecordController, Assembly-CSharp
+        m_MethodName: AddScatteredFrame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8199,41 +8200,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 5
   m_TargetDisplay: 0
---- !u!1 &1982910126
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1982910127}
-  m_Layer: 5
-  m_Name: Humanoid Parent
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1982910127
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1982910126}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -100}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1052894897}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1982964364
 GameObject:
   m_ObjectHideFlags: 0
