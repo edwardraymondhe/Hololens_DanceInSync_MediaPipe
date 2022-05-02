@@ -181,12 +181,12 @@ public class IpCamera : MonoBehaviour
 
     public float GetWidthFactor()
     {
-        return ((streamImage.texture.width == 0) ? mockWidth : streamImage.texture.width) * xyFactor;
+        return ((widthFactor == 0) ? (mockWidth * xyFactor) : widthFactor);
     }
 
     public float GetHeightFactor()
     {
-        return ((streamImage.texture.height == 0) ? mockHeight : streamImage.texture.height) * xyFactor;
+        return ((heightFactor == 0) ? (mockHeight * xyFactor) : heightFactor);
     }
 
     public float GetDepthFactor()

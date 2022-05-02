@@ -5,6 +5,8 @@ using Debug = UnityEngine.Debug;
 using System.Threading;
 using System.Text;
 using System;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 /// <summary>
 /// MediaPipe servers will be fetching pose datas and streamed videos from socket
@@ -25,7 +27,11 @@ public class MediaPipeServer: MonoBehaviour
 
     public bool receiveStop = false;
 
-    public HumanoidController humanoidController;
+    public float processFPS = 30;
+    public float processTimer;
+    public float currentTimer = 0.0f;
+
+    public Button addScatterShotButton;
 
     private void Start()
     {
@@ -34,24 +40,69 @@ public class MediaPipeServer: MonoBehaviour
 
         if (runOnStart)
             StartServer();
+
+        processTimer = 1.0f / processFPS;
     }
 
     private void Update()
     {
+        processTimer = 1.0f / processFPS;
+
         frame++;
 
         if (poseLandmarks.landmarks.Count > 0)
         {
-            ProcessPoseFrame();
-            ProcessPoseRecord();
-            // ProcessHumanoid();
+            currentTimer += Time.deltaTime;
+
+            ProcessHumanoid();
+
+            if (currentTimer > processTimer)
+            {
+                ProcessPoseFrame();
+                RecordContinuousSequence();
+                currentTimer = 0.0f;
+            }
+
+            addScatterShotButton.interactable = isScatteredRecording;
         }
-        // HandleImage(recvData, new Vector2(720, 1280));
+        
     }
+    List<Quaternion> quaternions = new List<Quaternion>();
+    public bool useCameraFactor = false;
+
+    public List<int> upper = new List<int> { 14, 16, 18, 20, 22, 13, 15, 17, 19, 21 };
+    public List<int> lower = new List<int> {  26, 28, 30, 32,  25, 27, 29, 31 };
+
+    public float zUpper = 0.25f;
+    public float zLower = 0.25f;
 
     private void ProcessHumanoid()
     {
-        // humanoidController.ProcessHumanoid(poseLandmarks);
+        List<Vector3> landmarks = new List<Vector3>();
+        float x, y, z;
+        if (!useCameraFactor)
+        {
+            x = poseEditor.previewHumanoidController.x;
+            y = poseEditor.previewHumanoidController.y;
+            z = poseEditor.previewHumanoidController.z;
+        }
+        else
+        {
+            x = ipCamera.GetWidthFactor();
+            y = ipCamera.GetHeightFactor();
+            z = ipCamera.GetDepthFactor();
+        }
+
+        foreach (var landmark in poseLandmarks.landmarks)
+        {
+            Vector3 position = new Vector3(
+                landmark.x * x,
+                landmark.y * y,
+                landmark.z * z);
+            landmarks.Add(position);
+        }
+
+        quaternions = poseEditor.previewHumanoidController.UpdateByRealTime(landmarks);
     }
 
     public void StartServer()
@@ -179,8 +230,8 @@ public class MediaPipeServer: MonoBehaviour
     public PoseFrame currentPoseFrame;
 
     public PoseRecorder poseRecorder;
-    public bool isPoseStartRecording = false;
-    public bool isPoseNowRecording = false;
+    public bool isContinuousRecordToggled = false;
+    public bool isContinuousRecording = false;
 
     public void ProcessPoseFrame()
     {
@@ -189,37 +240,78 @@ public class MediaPipeServer: MonoBehaviour
             currentPoseFrame = PoseFrame.CreateInstance();
 
         lastPoseFrame = currentPoseFrame;
-        currentPoseFrame = PoseFrame.CreateInstance(lastPoseFrame, Time.deltaTime, poseLandmarks, ipCamera.GetWidthFactor(), ipCamera.GetHeightFactor(), ipCamera.GetDepthFactor());
+
+        currentPoseFrame = PoseFrame.CreateInstance(lastPoseFrame, 1.0f / processFPS, poseLandmarks.landmarks, quaternions, ipCamera.GetWidthFactor(), ipCamera.GetHeightFactor(), ipCamera.GetDepthFactor());
     }
 
-    public void ProcessPoseRecord()
+    public void RecordInstantFrame()
+    {
+        if (poseRecorder == null)
+            poseRecorder = new PoseRecorder();
+
+        poseRecorder.SaveInstantFrame(currentPoseFrame);
+    }
+
+    /// <summary>
+    /// Toggles on/off continous-record, called from UI
+    /// </summary>
+    public void ToggleContinuousRecord()
+    {
+        isContinuousRecordToggled = true;
+    }
+    
+    /// <summary>
+    /// Controls continuous-record flow
+    /// </summary>
+    public void RecordContinuousSequence()
     {
         // Pose frames flow control
-        if (isPoseStartRecording)
+        if (isContinuousRecordToggled)
         {
-            if (!isPoseNowRecording)
+            if (!isContinuousRecording)
+                // Initialize a new recorder
                 poseRecorder = new PoseRecorder();
             else
             {
-                poseRecorder.SaveSequence();
+                // Save continous sequence to local
+                poseRecorder.SaveContinuousSequence();
                 poseEditor.RefreshPoseBrowserContent();
             }
 
-            isPoseNowRecording = !isPoseNowRecording;
+            isContinuousRecording = !isContinuousRecording;
 
-            isPoseStartRecording = false;
+            isContinuousRecordToggled = false;
         }
 
-        if (isPoseNowRecording)
-            poseRecorder.RecordFrame(currentPoseFrame);
+        // If currently recording, add current frame
+        if (isContinuousRecording)
+            poseRecorder.AddContinuousFrame(currentPoseFrame);
     }
+    
+    // Controls scattered record
+    public bool isScatteredRecording = false;
 
-
-    public void TogglePoseRecording()
+    /// <summary>
+    /// Toggles on/off scattered-record, called from UI
+    /// </summary>
+    public void ToggleScatteredRecord()
     {
-        isPoseStartRecording = true;
+        if (poseRecorder == null)
+        {
+            poseRecorder = new PoseRecorder();
+            isScatteredRecording = true;
+        }
+        else
+            isScatteredRecording = !isScatteredRecording;         
     }
-
+    
+    /// <summary>
+    /// Adds the frame to current scattered sequence, called from UI
+    /// </summary>
+    public void AddScatteredFrame()
+    {
+        poseRecorder.AddScatteredFrame(currentPoseFrame);
+    }
 
     private void OnApplicationQuit()
     {

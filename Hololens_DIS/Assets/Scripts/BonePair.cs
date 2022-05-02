@@ -62,7 +62,7 @@ public class BonePairLink
     }
 
 
-    public List<Vector3> GetImagePositions(Landmarks landmarks, float widthFactor, float heightFactor, float depthFactor)
+    public List<Vector3> GetImagePositions(List<Landmark> landmarks, float widthFactor, float heightFactor, float depthFactor)
     {
         Vector3 firstPosition = Vector3.zero;
         Vector3 secondPosition = Vector3.zero;
@@ -75,23 +75,23 @@ public class BonePairLink
         {
             if (secondBone == HumanBodyBones.RightUpperArm)
             {
-                firstPosition = GetImagePosition(landmarks.landmarks[14], widthFactor, heightFactor, depthFactor);
-                secondPosition = GetImagePosition(landmarks.landmarks[12], widthFactor, heightFactor, depthFactor);
-                thirdPosition = GetImagePosition(landmarks.landmarks[24], widthFactor, heightFactor, depthFactor);
+                firstPosition = GetImagePosition(landmarks[14], widthFactor, heightFactor, depthFactor);
+                secondPosition = GetImagePosition(landmarks[12], widthFactor, heightFactor, depthFactor);
+                thirdPosition = GetImagePosition(landmarks[24], widthFactor, heightFactor, depthFactor);
             }
             else
             {
-                firstPosition = GetImagePosition(landmarks.landmarks[12], widthFactor, heightFactor, depthFactor);
-                secondPosition = GetImagePosition(landmarks.landmarks[24], widthFactor, heightFactor, depthFactor);
-                thirdPosition = GetImagePosition(landmarks.landmarks[26], widthFactor, heightFactor, depthFactor);
+                firstPosition = GetImagePosition(landmarks[12], widthFactor, heightFactor, depthFactor);
+                secondPosition = GetImagePosition(landmarks[24], widthFactor, heightFactor, depthFactor);
+                thirdPosition = GetImagePosition(landmarks[26], widthFactor, heightFactor, depthFactor);
             }
         }
         else
         {
             Vector3Int connectionIdx = GetBoneConnection(firstBoneIdx, secondBoneIdx);
-            firstPosition = GetImagePosition(landmarks.landmarks[connectionIdx.x], widthFactor, heightFactor, depthFactor);
-            secondPosition = GetImagePosition(landmarks.landmarks[connectionIdx.y], widthFactor, heightFactor, depthFactor);
-            thirdPosition = GetImagePosition(landmarks.landmarks[connectionIdx.z], widthFactor, heightFactor, depthFactor);
+            firstPosition = GetImagePosition(landmarks[connectionIdx.x], widthFactor, heightFactor, depthFactor);
+            secondPosition = GetImagePosition(landmarks[connectionIdx.y], widthFactor, heightFactor, depthFactor);
+            thirdPosition = GetImagePosition(landmarks[connectionIdx.z], widthFactor, heightFactor, depthFactor);
         }
 
         return new List<Vector3> { firstPosition, secondPosition, thirdPosition };

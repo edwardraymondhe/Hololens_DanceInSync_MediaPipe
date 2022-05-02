@@ -9,6 +9,8 @@ public class PoseFrame : ScriptableBase
     /// Data structure to save angles, angular speeds corresponding to combinations of bones.
     /// </summary>
     public List<BonePair> bonePairs = new List<BonePair>();
+    public List<Quaternion> boneQuaternions = new List<Quaternion>(18);
+    public List<Landmark> boneLandmarks = new List<Landmark>();
     public float duration = 0.5f;
     public bool blank = false;
 
@@ -29,10 +31,10 @@ public class PoseFrame : ScriptableBase
     /// <param name="widthFactor"></param>
     /// <param name="heightFactor"></param>
     /// <param name="depthFactor"></param>
-    public static PoseFrame CreateInstance(PoseFrame lastPoseFrame, float duration, Landmarks landmarks, float widthFactor, float heightFactor, float depthFactor)
+    public static PoseFrame CreateInstance(PoseFrame lastPoseFrame, float duration, List<Landmark> landmarks, List<Quaternion> boneQuaternions, float widthFactor, float heightFactor, float depthFactor)
     {
         var data = CreateInstance<PoseFrame>();
-        data.Init(lastPoseFrame, duration, landmarks, widthFactor, heightFactor, depthFactor);
+        data.Init(lastPoseFrame, duration, landmarks, boneQuaternions, widthFactor, heightFactor, depthFactor);
         return data;
     }
 
@@ -42,17 +44,17 @@ public class PoseFrame : ScriptableBase
         return data;
     }
 
-    private void Init(PoseFrame lastPoseFrame, float duration, Landmarks landmarks, float widthFactor, float heightFactor, float depthFactor)
+    private void Init(PoseFrame lastPoseFrame, float duration, List<Landmark> landmarks, List<Quaternion> boneQuaternions, float widthFactor, float heightFactor, float depthFactor)
     {
         bonePairs = GetInitBonePairs();
         this.widthFactor = widthFactor;
         this.heightFactor = heightFactor;
         this.depthFactor = depthFactor;
 
-        SetParams(lastPoseFrame, duration, landmarks);
+        SetParams(lastPoseFrame, duration, landmarks, boneQuaternions);
     }
 
-    public void SetParams(PoseFrame lastPoseFrame, float duration, Landmarks landmarks)
+    public void SetParams(PoseFrame lastPoseFrame, float duration, List<Landmark> landmarks, List<Quaternion> boneQuaternions)
     {
         foreach (var bonePair in bonePairs)
         {
@@ -65,6 +67,8 @@ public class PoseFrame : ScriptableBase
             bonePair.bonePairStatus.velocity = velocity;
             bonePair.bonePairStatus.dir = dir;
         }
+        this.boneLandmarks = landmarks;
+        this.boneQuaternions = boneQuaternions;
         this.duration = duration;
     }
 
@@ -119,7 +123,7 @@ public class PoseFrame : ScriptableBase
     /// <param name="widthFactor"></param>
     /// <param name="heightFactor"></param>
     /// <param name="depthFactor"></param>
-    public void GetScore(PoseFrame lastPoseFrame, float duration, Landmarks landmarks, float widthFactor, float heightFactor, float depthFactor)
+    public void GetScore(PoseFrame lastPoseFrame, float duration, List<Landmark> landmarks, float widthFactor, float heightFactor, float depthFactor)
     {
         Debug.Log("----------- BEGIN ------------");
         foreach (var bonePair in bonePairs)

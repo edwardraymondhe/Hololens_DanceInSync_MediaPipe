@@ -109,7 +109,7 @@ public class PoseVisuallizer3D : MonoBehaviour
             currentPoseFrame = PoseFrame.CreateInstance();
 
         lastPoseFrame = currentPoseFrame;
-        currentPoseFrame = PoseFrame.CreateInstance(lastPoseFrame, Time.deltaTime, poseLandmarks, widthFactor, heightFactor, depthFactor);
+        currentPoseFrame = PoseFrame.CreateInstance(lastPoseFrame, Time.deltaTime, poseLandmarks.landmarks, new List<Quaternion>(), widthFactor, heightFactor, depthFactor);
     }
 
     public void ProcessPoseRecord()
@@ -121,7 +121,7 @@ public class PoseVisuallizer3D : MonoBehaviour
                 poseRecorder = new PoseRecorder();
             else
             {
-                poseRecorder.SaveSequence();
+                poseRecorder.SaveContinuousSequence();
                 poseEditor.RefreshPoseBrowserContent();
             }
 
@@ -131,7 +131,7 @@ public class PoseVisuallizer3D : MonoBehaviour
         }
 
         if (isPoseNowRecording)
-            poseRecorder.RecordFrame(currentPoseFrame);
+            poseRecorder.AddScatteredFrame(currentPoseFrame);
     }
 
     public void TogglePoseRecording()

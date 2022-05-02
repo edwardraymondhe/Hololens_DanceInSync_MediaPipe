@@ -1,26 +1,43 @@
 public class PoseRecorder
 {
-    public PoseSequence poseSequence = new PoseSequence();
+    public PoseSequence continuousPoseSequence = new PoseSequence();
+    public PoseSequence scatteredPoseSequence = new PoseSequence();
 
     public PoseRecorder() { }
-    public PoseRecorder(PoseFrame poseFrame)
+
+    public void SaveInstantFrame(PoseFrame poseFrame)
     {
-        poseSequence.Add(poseFrame);
+        Helper.Pose.SaveInstance(poseFrame);
     }
 
-    public void RecordFrame(PoseFrame poseFrame)
+    public void AddScatteredFrame(PoseFrame poseFrame)
     {
-        poseSequence.Add(poseFrame);
+        scatteredPoseSequence.Add(poseFrame);
+    }
+    public void AddContinuousFrame(PoseFrame poseFrame)
+    {
+        continuousPoseSequence.Add(poseFrame);
     }
 
-    public void SaveFrames()
+    public void SaveScatteredFrames()
     {
-        foreach (var frame in poseSequence.poseFrames)
+        foreach (var frame in continuousPoseSequence.poseFrames)
+            Helper.Pose.SaveInstance(frame);
+    }
+    public void SaveScatteredSequence()
+    {
+        Helper.Pose.SaveInstance(scatteredPoseSequence);
+    }
+
+
+    public void SaveContinuousFrames()
+    {
+        foreach (var frame in continuousPoseSequence.poseFrames)
             Helper.Pose.SaveInstance(frame);
     }
 
-    public void SaveSequence()
+    public void SaveContinuousSequence()
     {
-        Helper.Pose.SaveInstance(poseSequence);
+        Helper.Pose.SaveInstance(continuousPoseSequence);
     }
 }

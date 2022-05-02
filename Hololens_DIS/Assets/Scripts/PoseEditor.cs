@@ -57,6 +57,10 @@ public class PoseEditor: MonoBehaviour, IDragHandler, IEndDragHandler, IPointerD
     public Sprite pauseImage;
     public Button playButton;
 
+    [Header("Humanoid")]
+    public HumanoidController editHumanoidController; // 1. From video, 2. Focusing on the current cursor
+    public HumanoidController previewHumanoidController; // 1. Left-click on frame
+
     private void Awake()
     {
         RefreshPoseBrowserContent();
@@ -88,6 +92,7 @@ public class PoseEditor: MonoBehaviour, IDragHandler, IEndDragHandler, IPointerD
         }
 
         playButton.GetComponent<Image>().sprite = isEditorPlay ? pauseImage : playImage;
+
 
         cursor.transform.position = targetPosition;
         cursor.transform.localPosition = new Vector3(cursor.transform.localPosition.x, 0.0f, cursor.transform.localPosition.z);
@@ -314,6 +319,10 @@ public class PoseEditor: MonoBehaviour, IDragHandler, IEndDragHandler, IPointerD
 
             currentEditorFrameItem.highlightUI.SetActive(true);
 
+            currentPoseFrame = currentEditorFrameItem.poseFrame;
+
+            // TODO: Control Humanoid Here
+            editHumanoidController.UpdateByFrame(currentPoseFrame);
 
             float itemLeftBorder = lastItemPoints[0].x;
             float itemRightBorder = lastItemPoints[2].x;
@@ -347,6 +356,8 @@ public class PoseEditor: MonoBehaviour, IDragHandler, IEndDragHandler, IPointerD
         else
             isEditorPlay = false;
     }
+
+    public PoseFrame currentPoseFrame;
 
     public void InsertPoseEditorTimelineFrame(GameObject insertFrameItem, PoseFrame insertPoseFrame, bool angle, bool velocity, int insertIdx)
     {
@@ -517,11 +528,29 @@ public class PoseEditor: MonoBehaviour, IDragHandler, IEndDragHandler, IPointerD
             CreatePoseEditorTimeline();
     }
 
-    public void SetChosenPoseFrame(string poseFrame)
+    public void SetChosenPoseFrame(string poseFrameName)
     {
         // Load the pose frame
-        chosenPoseFrameName = poseFrame;
-        chosenPoseFrame = LoadInstance<PoseFrame>(chosenPoseFrameName);
+        chosenPoseFrameName = poseFrameName;
+        LoadHumanoid(chosenPoseFrameName);
+
+        isEditorPlay = false;
+    }
+
+    public string lastFrame = "";
+
+    public void PreviewHumanoid(string poseFrameName)
+    {
+        if (string.IsNullOrEmpty(lastFrame))
+            lastFrame = poseFrameName;
+
+        LoadHumanoid(poseFrameName);
+    }
+
+    private void LoadHumanoid(string poseFrameName)
+    {
+        var poseFrame = LoadInstance<PoseFrame>(poseFrameName);
+        editHumanoidController.UpdateByFrame(poseFrame, true);
     }
 
     public PoseEditorFrameItem edittingEditorFrameItem;

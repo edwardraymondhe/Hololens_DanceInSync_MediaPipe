@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 /// 2. Hover, Preview Pose within the UI
 /// 3. Drag, Drag&Drop Pose to Editor
 /// </summary>
-public class PoseFrameBrowserItem : BrowserItemBase, IDragHandler, IEndDragHandler
+public class PoseFrameBrowserItem : BrowserItemBase, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public void OnDrag(PointerEventData eventData)
     {
@@ -55,6 +55,16 @@ public class PoseFrameBrowserItem : BrowserItemBase, IDragHandler, IEndDragHandl
     public override void SetChosenPose()
     {
         poseEditor.SetChosenPoseFrame(itemName);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        poseEditor.PreviewHumanoid(poseEditor.lastFrame);
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        poseEditor.PreviewHumanoid(itemName);
     }
 
     #region IPointerClickHandler implementation

@@ -12,7 +12,7 @@ public static class Helper
 {
     public static class Socket
     {
-        public static int port = 9001;
+        public static int port = 9002;
 
         private static string ip = "127.0.0.1";
 
@@ -57,7 +57,7 @@ public static class Helper
 
             public string GetString()
             {
-                return string.Format("Score: {0}, KeyPoint: [{1}, {2}, {3}]", score, x, y, z);
+                return string.Format("Score: {0}, KeyPoint: [{1}, {2}, {3}]", score, this.x, this.y, this.z);
             }
         }
 
