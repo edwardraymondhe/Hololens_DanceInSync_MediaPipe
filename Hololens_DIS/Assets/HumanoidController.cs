@@ -394,6 +394,15 @@ public class HumanoidController : MonoBehaviour
         SetLocalRotation(rhip, poseFrame.boneQuaternions[(int)HumanBodyBones.RightUpperLeg], factor);
         SetLocalRotation(rknee, poseFrame.boneQuaternions[(int)HumanBodyBones.RightLowerLeg], factor);
         SetLocalRotation(rfoot, poseFrame.boneQuaternions[(int)HumanBodyBones.RightFoot], factor);
+
+
+        // Just Test on the Left arm
+        string output = "";
+        foreach (var bonePair in poseFrame.bonePairs)
+        {
+            output += (bonePair.bonePairLink.GetBoneString() + " : " + bonePair.bonePairStatus.angle + "\n");
+        }
+        Debug.Log(output);
     }
 
     /// <summary>
