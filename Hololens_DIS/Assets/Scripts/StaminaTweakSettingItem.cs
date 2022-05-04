@@ -24,7 +24,7 @@ public class StaminaTweakSettingItem : BaseTweakSettingItem
         buttonText.text = value.ToString();
         buttonConfigHelper.MainLabelText = isCounterMode ? "Counter" : "Timer";
 
-        Helper.UpdateHumanoidBySequence(ref currentTimer, ref poseSequence, ref humanoid, humanoidSpeed);
+        Helper.UpdateHumanoidBySequence(ref currentTimer, ref poseSequence, ref humanoid);
     }
 
     public void Init(TweakStageController stageController, PoseSequence poseSequence, bool isCounterMode)

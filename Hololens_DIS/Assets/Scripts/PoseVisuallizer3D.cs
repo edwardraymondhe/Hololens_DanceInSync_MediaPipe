@@ -49,7 +49,7 @@ public class PoseVisuallizer3D : MonoBehaviour
     */
     Helper.Pose.Landmarks poseLandmarks = new Helper.Pose.Landmarks();
 
-    public PoseEditor poseEditor;
+    public FrameBasedPoseEditor poseEditor;
 
     void Start()
     {

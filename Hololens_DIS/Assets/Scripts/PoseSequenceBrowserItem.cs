@@ -1,24 +1,33 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
 public class PoseSequenceBrowserItem : BrowserItemBase
 {
     public override void SetChosenPose()
     {
-        poseEditor.SetChosenPoseSequence(itemName);
+        if (poseEditor is SequenceBasedPoseEditor seqEditor)
+            seqEditor.SetChosenPoseSequence(itemName);
+        else if (poseEditor is FrameBasedPoseEditor frmEditor)
+            frmEditor.SetChosenPoseSequence(itemName);
     }
 
     #region IPointerClickHandler implementation
-    /*
-    void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
+    public override void OnPointerExit(PointerEventData eventData)
     {
+        poseEditor.isSequenceLoaded = false;
     }
 
-    void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
+    public override void OnPointerEnter(PointerEventData eventData)
     {
+        poseEditor.BeginPreviewPoseSequenceToHumanoid(itemName);
     }
 
-    void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+
+    public override void OnPointerClick(PointerEventData eventData)
     {
-        // TODO: show a poseFrame applied on to the humanoid
+        poseEditor.isSequenceLoaded = true;
     }
-    */
     #endregion
 }

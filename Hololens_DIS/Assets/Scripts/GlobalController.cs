@@ -4,6 +4,38 @@ using UnityEngine;
 using Microsoft.MixedReality.Toolkit.Utilities;
 using UnityEngine.SceneManagement;
 
+
+#region Setting
+[System.Serializable]
+public class Editor
+{
+    public float expandSpeed = 0.1f;
+    public float expandTimer = 0.5f;
+    public float humanoidPlaySpeed = 0.1f;
+    public float cycleDuration = 4.5f;
+}
+[System.Serializable]
+public class Setting
+{
+    public int port = 9002;
+    private string ip = "127.0.0.1";
+    public string Ip
+    {
+        get
+        {
+#if UNITY_EDITOR
+                return "127.0.0.1";
+#else
+            return "192.168.0.243";
+#endif
+        }
+    }
+    public float processFPS = 30.0f;
+
+    public Editor editor = new Editor();
+}
+#endregion
+
 public class GlobalController : GlobalSingleTon<GlobalController>
 {
     #region Stage
@@ -22,27 +54,8 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     public GameObject screenObjectCollection;
     #endregion
 
-    #region Setting
     public Setting setting = new Setting();
 
-    public class Setting
-    {
-        public int port = 9002;
-        private string ip = "127.0.0.1";
-        public string Ip
-        {
-            get
-            {
-#if UNITY_EDITOR
-                return "127.0.0.1";
-#else
-                return "192.168.0.243";
-#endif
-            }
-        }
-        public float processFPS = 30.0f;
-    }
-    #endregion
 
     private void Start()
     {

@@ -23,46 +23,21 @@ public class MouseStatus
 /// TODO: 3. Hover, Preview Pose
 /// TODO: 4. Right Click, menu for Delete & Rename
 /// </summary>
-public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHandler, IPointerDownHandler, IBeginDragHandler, IEndDragHandler, IPointerUpHandler, IPointerClickHandler
+public class PoseEditorFrameItem : PoseEditorItem
 {
-    public GameObject prevEditorItemMask;
-    public GameObject nextEditorItemMask;
-    public GameObject prevEditorItem;
-    public GameObject nextEditorItem;
-    public GameObject poseEditorMenu;
-
     public Toggle angleToggle;
     public Toggle velocityToggle;
-
-    public PoseEditor poseEditor;
-    public float frameItemExpandSpeed = 1.0f;
-
-    private float originalWidth;
-    private float widthPerSecond;
-    private float originalDuration;
-    
-    private string itemName;
-    private RectTransform rectTransform;
+    public FrameBasedPoseEditor poseEditor;
     public PoseFrame poseFrame;
-    private Vector3 localPosition;
-    private Transform frameItemParent;
-    private int prevFrameItemIdx;
-
-    public MouseStatus expandStatus = new MouseStatus(false, false);
-    public MouseStatus dragStatus = new MouseStatus(true, true);
-    private float focusTimer = 0.0f;
-    private bool isFocused = false;
-
-    public GameObject highlightUI;
-
+    
     private void Update()
     {
-        if (isFocused && (expandStatus.isEnabled == false && dragStatus.isEnabled == false))
+        if (isPressed && (expandStatus.isEnabled == false && dragStatus.isEnabled == false))
         {
             if (Input.GetKey(KeyCode.Mouse0))
             {
-                focusTimer += Time.deltaTime;
-                if (focusTimer > 0.25f)
+                pressedTimer += Time.deltaTime;
+                if (pressedTimer > 0.25f)
                 {
                     expandStatus.Set(true, false);
                     dragStatus.Set(false, false);
@@ -70,15 +45,15 @@ public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHan
             }
         }
         else
-            focusTimer = 0.0f;
+            pressedTimer = 0.0f;
     }
 
-    public void InitParams(PoseEditor poseEditor, float widthPerSecond, PoseFrame poseFrame, bool angle, bool velocity)
+    public void InitParams(FrameBasedPoseEditor poseEditor, float widthPerSecond, PoseFrame poseFrame)
     {
         rectTransform = GetComponent<RectTransform>();
 
-        angleToggle.isOn = angle;
-        velocityToggle.isOn = velocity;
+        // angleToggle.isOn = angle;
+        // velocityToggle.isOn = velocity;
 
         this.poseEditor = poseEditor;
         this.poseFrame = poseFrame;
@@ -93,7 +68,7 @@ public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHan
         originalWidth = targetDelta.x;
     }
 
-    public void UpdateParams(float widthPerSecond)
+    public override void UpdateParams(float widthPerSecond)
     {
         this.widthPerSecond = widthPerSecond;
 
@@ -104,22 +79,13 @@ public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHan
         originalWidth = this.widthPerSecond * originalDuration;
     }
 
-    public void DeletePoseFrame()
+    public override void DeleteItem()
     {
         poseEditor.edittingPoseSequence.Remove(poseFrame);
         Destroy(gameObject);
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        // TODO: Show Preview of the frame
-    }
-
-    public void OnPointerUp(PointerEventData eventData)
-    {
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
+    public override void OnPointerClick(PointerEventData eventData)
     {
         switch (eventData.button)
         {
@@ -129,33 +95,7 @@ public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHan
         }
     }
 
-    public void ToggleMenu()
-    {
-        poseEditorMenu.SetActive(!poseEditorMenu.activeInHierarchy);
-    }
-
-    public void CloseMenu()
-    {
-        poseEditorMenu.SetActive(false);
-    }
-
-    public void OpenMenu()
-    {
-        poseEditorMenu.SetActive(true);
-    }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            localPosition = rectTransform.localPosition;
-            frameItemParent = transform.parent;
-            prevFrameItemIdx = transform.GetSiblingIndex();
-            isFocused = true;
-        }
-    }
-
-    public void OnDrag(PointerEventData eventData)
+    public override void OnDrag(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
@@ -163,7 +103,7 @@ public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHan
             {
                 Vector2 sizeDelta = rectTransform.sizeDelta;
 
-                float targetWidth = sizeDelta.x + Input.GetAxis("Mouse X") * frameItemExpandSpeed;
+                float targetWidth = sizeDelta.x + Input.GetAxis("Mouse X") * GlobalController.Instance.setting.editor.expandSpeed;
                 Vector2 targetDelta = new Vector2(targetWidth, sizeDelta.y);
                 float deltaPercentage = targetWidth / originalWidth;
 
@@ -177,21 +117,7 @@ public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHan
         }
     }
 
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            if (expandStatus.isAvailable)
-                expandStatus.isEnabled = true;
-            else if (dragStatus.isAvailable)
-            {
-                dragStatus.isEnabled = true;
-                transform.SetParent(GameObject.Find("Overlay Canvas").transform);
-            }
-        }
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
+    public override void OnEndDrag(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
@@ -199,19 +125,19 @@ public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHan
             if (dragStatus.isEnabled)
             {
                 var hoverObjects = Helper.GetOverUI(poseEditor.poseEditorCanvas);
-                var idx = PoseFrameBrowserItem.GetInsertIndex(e => e.GetComponent<PoseEditorFrameItem>() != null && e.GetComponent<PoseEditorFrameItem>() != this, hoverObjects);
+                var idx = BrowserItemBase.GetInsertIndex(e => e.GetComponent<PoseEditorFrameItem>() != null && e.GetComponent<PoseEditorFrameItem>() != this, hoverObjects, poseEditor);
 
                 Debug.Log("Idx: " + idx);
                 if (idx == -1)
                 {
                     // rectTransform.parent = frameItemParent;
                     // rectTransform.localPosition = localPosition;
-                    poseEditor.InsertPoseEditorTimelineFrame(gameObject, poseFrame, angleToggle.isOn, velocityToggle.isOn, prevFrameItemIdx);
+                    poseEditor.InsertItem(gameObject, poseFrame, angleToggle.isOn, velocityToggle.isOn, prevItemIdx);
                 }
                 else
                 {
                     poseEditor.edittingPoseSequence.Remove(poseFrame);
-                    poseEditor.InsertPoseEditorTimelineFrame(gameObject, poseFrame, angleToggle.isOn, velocityToggle.isOn, idx);
+                    poseEditor.InsertItem(gameObject, poseFrame, angleToggle.isOn, velocityToggle.isOn, idx);
                 }
             }
             else // If not dragging, only expanding
@@ -222,7 +148,7 @@ public class PoseEditorFrameItem : MonoBehaviour, IDragHandler, IPointerEnterHan
             // Reset the status
             dragStatus.Set(true, false);
             expandStatus.Set(false, false);
-            isFocused = false;
+            isPressed = false;
         }
     }
 }

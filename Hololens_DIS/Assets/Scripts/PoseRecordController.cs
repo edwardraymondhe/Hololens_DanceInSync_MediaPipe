@@ -13,6 +13,11 @@ public class PoseRecordController : MonoBehaviour
     public PoseRecorder poseRecorder;
     public bool isContinuousRecordToggled = false;
     public bool isContinuousRecording = false;
+
+    [Header("Sub Windows")]
+    public InputSubWindowController inputSubWindow;
+    public GameObject inputSubWindowPrefab;
+
     private void Update()
     {
         processTimer = 1.0f / GlobalController.Instance.setting.processFPS;
@@ -60,8 +65,12 @@ public class PoseRecordController : MonoBehaviour
             else
             {
                 // Save continous sequence to local
-                poseRecorder.SaveContinuousSequence();
-                poseEditor.RefreshPoseBrowserContent();
+                inputSubWindow = Instantiate(inputSubWindowPrefab, GameObject.Find("Sub Window Canvas").transform).GetComponent<InputSubWindowController>();
+                inputSubWindow.Init("设置", "请设置以下参数（整数）：");
+                inputSubWindow.AddInput("最小八拍");
+                inputSubWindow.AddInput("当前八拍");
+                inputSubWindow.AddInput("正常八拍");
+                inputSubWindow.AddSubmit(CheckAndSaveContinuousSequence);
             }
 
             isContinuousRecording = !isContinuousRecording;
@@ -72,6 +81,48 @@ public class PoseRecordController : MonoBehaviour
         // If currently recording, add current frame
         if (isContinuousRecording)
             poseRecorder.AddContinuousFrame(server.currentPoseFrame);
+    }
+
+    public void CheckAndSaveContinuousSequence()
+    {
+        foreach (var inputField in inputSubWindow.inputFields)
+        {
+            float f;
+            if (!float.TryParse(inputField.Value.text, out f))
+            {
+                inputSubWindow.GetComponent<InputSubWindowController>().ChangeContent("请输入合法数据。\n请设置以下参数（整数）：");
+                return;
+            }
+
+            if (f % 1.0f == 0.0f && f > 0.0f)
+            {
+                switch (inputField.Key)
+                {
+                    case "最小八拍":
+                        poseRecorder.continuousPoseSequence.minCycles = f;
+                        break;
+                    case "当前八拍":
+                        poseRecorder.continuousPoseSequence.curCycles = f;
+                        break;
+                    case "正常八拍":
+                        poseRecorder.continuousPoseSequence.SetRawCycles(f);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if (!poseRecorder.continuousPoseSequence.CheckCyclePowerValid())
+        {
+            inputSubWindow.GetComponent<InputSubWindowController>().ChangeContent("请输入合法数据。\n请设置以下参数（整数）：");
+            return;
+        }
+
+        inputSubWindow.Close();
+
+        poseRecorder.SaveContinuousSequence();
+        poseEditor.RefreshPoseBrowserContent();
     }
 
     // Controls scattered record

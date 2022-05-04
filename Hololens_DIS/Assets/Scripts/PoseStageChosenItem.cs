@@ -26,7 +26,7 @@ public class PoseStageChosenItem : MonoBehaviour
 
     private void Update()
     {
-        Helper.UpdateHumanoidBySequence(ref currentTimer, ref poseSequence, ref humanoid, humanoidSpeed);
+        Helper.UpdateHumanoidBySequence(ref currentTimer, ref poseSequence, ref humanoid);
     }
 
 }

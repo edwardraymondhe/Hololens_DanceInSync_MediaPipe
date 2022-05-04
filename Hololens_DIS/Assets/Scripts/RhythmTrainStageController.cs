@@ -34,7 +34,7 @@ public class RhythmTrainStageController : BaseTrainStageController
         {
             var poseSequenceDeepCopy = Helper.DeepCopy(keyValuePair.poseSequence);
             var poseSequenceLength = musicStage.chosenEightBeatDuration * keyValuePair.value;
-            poseSequenceDeepCopy.FitTotalDuration(poseSequenceLength);
+            poseSequenceDeepCopy.SetDuration(poseSequenceLength);
 
             rhythmModeData.Add(new TrainModeData(poseSequenceDeepCopy, keyValuePair.value));
         }

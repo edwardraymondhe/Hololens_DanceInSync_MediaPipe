@@ -418,9 +418,9 @@ public static class Helper
         return isInView;
     }
 
-    public static void UpdateHumanoidBySequence(ref float currentTimer, ref PoseSequence poseSequence, ref HumanoidController humanoid, float speedFactor)
+    public static void UpdateHumanoidBySequence(ref float currentTimer, ref PoseSequence poseSequence, ref HumanoidController humanoid)
     {
-        currentTimer += Time.deltaTime * speedFactor;
+        currentTimer += Time.deltaTime * GlobalController.Instance.setting.editor.humanoidPlaySpeed;
 
         float tmpCurrentTimer = currentTimer;
         bool foundCurrentFrame = false;
