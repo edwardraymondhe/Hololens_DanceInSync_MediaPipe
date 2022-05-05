@@ -399,10 +399,7 @@ public class HumanoidController : MonoBehaviour
         // Just Test on the Left arm
         string output = "";
         foreach (var bonePair in poseFrame.bonePairs)
-        {
             output += (bonePair.bonePairLink.GetBoneString() + " : " + bonePair.bonePairStatus.angle + "\n");
-        }
-        Debug.Log(output);
     }
 
     /// <summary>

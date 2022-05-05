@@ -56,6 +56,7 @@ public class GlobalController : GlobalSingleTon<GlobalController>
 
     public Setting setting = new Setting();
 
+    public MediaPipeServer server;
 
     private void Start()
     {

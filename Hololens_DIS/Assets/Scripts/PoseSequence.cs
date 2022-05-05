@@ -61,9 +61,6 @@ public class PoseSequence : ScriptableBase
         float newDuration = oldDuration / oldCycles * newCycles;
         curCycles = newCycles;
 
-
-
-
         Debug.Log("Duration: " + newDuration);
         Debug.Log("Cycles: " + newCycles);
 
@@ -191,19 +188,21 @@ public class PoseSequence : ScriptableBase
     {
         // TODO: Sets the cycles and min cycles
         float rawCycles = 0.0f;
+        float curCycles = 0.0f;
         float minCyclesRate = 64.0f;
         PoseSequence finalSequence = CreateInstance<PoseSequence>();
         foreach (var sequence in poseSequences)
         {
             finalSequence.fileName += sequence.fileName + " - ";
             finalSequence.poseFrames.AddRange(sequence.poseFrames);
-
-            rawCycles += sequence.curCycles;
+            finalSequence.angles.AddRange(sequence.angles);
+            finalSequence.velocities.AddRange(sequence.velocities);
+            curCycles += sequence.curCycles;
+            rawCycles += sequence.rawCycles;
             minCyclesRate = Mathf.Min(minCyclesRate, sequence.curCycles / sequence.minCycles);
         }
-
-        finalSequence.SetRawCycles(rawCycles);
-        finalSequence.curCycles = rawCycles;
+        finalSequence.rawCycles = rawCycles;
+        finalSequence.curCycles = curCycles;
         finalSequence.minCycles = rawCycles / minCyclesRate;
         finalSequence.fileName = finalSequence.fileName.Remove(finalSequence.fileName.Length - 3, 3);
         return finalSequence;
@@ -211,12 +210,244 @@ public class PoseSequence : ScriptableBase
 
 }
 
+
+
 [System.Serializable]
-public class TrainModeData
+public class RhythmSequenceBeatData
+{
+    // section
+    public int index;
+    public List<RhythmFrameData> data = new List<RhythmFrameData>();
+    public RhythmSequenceBeatData(int index)
+    {
+        this.index = index;
+    }
+}
+
+[System.Serializable]
+public class RhythmSequenceCycleData
+{
+    // section
+    public int index;
+    public List<RhythmSequenceBeatData> data = new List<RhythmSequenceBeatData>();
+    public RhythmSequenceCycleData(int index)
+    {
+        this.index = index;
+    }
+}
+
+[System.Serializable]
+public class RhythmSequenceData
 {
     public PoseSequence poseSequence;
-    public float value;
+    public List<RhythmFrameData> recordedFrames = new List<RhythmFrameData>();
+    public List<RhythmBeatScore> angleScores = new List<RhythmBeatScore>();
+    public List<RhythmBeatScore> velocityScores = new List<RhythmBeatScore>();
+    public RhythmSequenceData() { }
+    public RhythmSequenceData(PoseSequence poseSequence) { 
+        this.poseSequence = poseSequence;
+        // TODO: Initialize section -> beats -> score
+    }
 
-    public TrainModeData() { }
-    public TrainModeData(PoseSequence poseSequence, float value) { this.poseSequence = poseSequence; this.value = value; }
+    public void InitScore(float eightBeatDuration)
+    {
+        /* TODO: Angle
+         * 1. Get all the continuous chosen beats -->>  List<List<beats>>
+         * 2. Foreach List<...>, get seqbeat-start, seqbeat-end, get the frames within
+         *      a. 1 score -> 0.5 beat -> half the frames
+         *      b. get the List<score> for this seqbeat
+         */
+        float oneBeatDuration = eightBeatDuration / 8.0f;
+        bool foundSeqBeats = false;
+        List<PoseFrame> curreSeqFrames = new List<PoseFrame>();
+        int startBeat = 0;
+        int endBeat = 0;
+        float startTime = 0.0f;
+        float endTime = 0.0f;
+        for (int i = 0; i < poseSequence.angles.Count; i++)
+        {
+            if (poseSequence.angles[i] == true && foundSeqBeats == false)
+            {
+                foundSeqBeats = true;
+                curreSeqFrames = new List<PoseFrame>();
+                startBeat = i;
+            }
+
+            // TODO: End of curr seq beats
+            if ((poseSequence.angles[i] == false || i == poseSequence.angles.Count - 1 ) && foundSeqBeats == true)
+            {
+                foundSeqBeats = false;
+                endBeat = i;
+
+                startTime = oneBeatDuration * startBeat;
+                endTime = oneBeatDuration * (endBeat + 1);
+                Debug.Log(string.Format("One Seq-Beats: {0} ~ {1}", startTime, endTime));
+
+                float tmpTimer = 0.0f;
+                foreach (var poseFrame in poseSequence.poseFrames)
+                {
+                    // Found the current poseFrame
+                    tmpTimer += poseFrame.duration;
+                    if (tmpTimer > startTime)
+                    {
+                        if (tmpTimer < endTime)
+                            curreSeqFrames.Add(poseFrame);
+                        else
+                            break;
+                    }
+                }
+
+                // TODO: Add this complete seqbeatScore 
+                angleScores.Add(new RhythmBeatScore(curreSeqFrames));
+                curreSeqFrames.Clear();
+            }
+        }
+
+        /* TODO: Velocity
+         * 1. Get all the continuous chosen beats -->>  List<List<beats>>
+         * 2. Foreach List<...>, get seqbeat-start, seqbeat-end, get the frames within
+         *      a. 1 score -> 0.5 beat -> half the frames
+         *      b. get the List<velocity> for this seqbeat
+         */
+
+        foundSeqBeats = false;
+        curreSeqFrames = new List<PoseFrame>();
+        startBeat = 0;
+        endBeat = 0;
+        startTime = 0.0f;
+        endTime = 0.0f;
+        for (int i = 0; i < poseSequence.velocities.Count; i++)
+        {
+            if (poseSequence.velocities[i] == true && foundSeqBeats == false)
+            {
+                foundSeqBeats = true;
+                curreSeqFrames = new List<PoseFrame>();
+                startBeat = i;
+            }
+
+            // TODO: End of curr seq beats
+            if (foundSeqBeats == true || i == poseSequence.velocities.Count - 1)
+            {
+                foundSeqBeats = false;
+                endBeat = i;
+
+                startTime = eightBeatDuration * startBeat;
+                endTime = eightBeatDuration * (endBeat + 1);
+                Debug.Log(string.Format("One Seq-Beats: {0} ~ {1}", startTime, endTime));
+
+                float tmpTimer = 0.0f;
+                foreach (var poseFrame in poseSequence.poseFrames)
+                {
+                    // Found the current poseFrame
+                    tmpTimer += poseFrame.duration;
+                    if (tmpTimer > startTime)
+                    {
+                        if (tmpTimer < endTime)
+                            curreSeqFrames.Add(poseFrame);
+                        else
+                            break;
+                    }
+                }
+
+                // TODO: Add this complete seqbeatScore 
+                velocityScores.Add(new RhythmBeatScore(curreSeqFrames));
+                curreSeqFrames.Clear();
+            }
+        }
+    }
+
+    public void CalculateScore()
+    {
+        // The beats for calculation
+        foreach (var angleScore in angleScores)
+        {
+            // The std-frames within each beat
+            float beatScoreSum = 0.0f;
+            int calculatedCount = 0;
+            foreach (var containedFrame in angleScore.containedFrames)
+            {
+                // The recorded frames when training with std
+                RhythmFrameData recordedFrames = this.recordedFrames.Find(e => e.referenceFrame == containedFrame);
+                if (recordedFrames != null)
+                {
+                    beatScoreSum += recordedFrames.CalculateAngleScore();
+                    calculatedCount++;
+                }
+                else
+                {
+                    // TODO: There were no mocap data when training with std
+                }
+            }
+
+            // TODO: Set the final score for this beat
+            angleScore.beatScore = beatScoreSum / calculatedCount;
+        }
+
+        return;
+    }
+}
+
+[System.Serializable]
+public class RhythmBeatScore
+{
+    public List<PoseFrame> containedFrames = new List<PoseFrame>();
+    public float beatScore;
+    public RhythmBeatScore(List<PoseFrame> frames)
+    {
+        containedFrames = new List<PoseFrame>(frames);
+    }
+}
+
+[System.Serializable]
+public class RhythmFrameData
+{
+    public PoseFrame referenceFrame;
+    public List<PoseFrame> actualFrames = new List<PoseFrame>();
+    public RhythmFrameData(PoseFrame poseFrame)
+    {
+        this.referenceFrame = poseFrame;
+    }
+
+    public float CalculateAngleScore()
+    {
+
+        List<Vector3> sumEuler = new List<Vector3>();
+        for (int i = 0; i < 19; i++)
+            sumEuler.Add(Vector3.zero);
+
+        // Get average from the recorded poses
+        foreach (var recordedFrame in actualFrames)
+        {
+            for (int i = 0; i < recordedFrame.boneQuaternions.Count; i++)
+                sumEuler[i] += recordedFrame.boneQuaternions[i].eulerAngles;
+        }
+
+        Debug.Log("SumEuler[0]: " + sumEuler[0]);
+
+        float score = 0.0f;
+        for (int i = 0; i < sumEuler.Count; i++)
+        {
+            if (i == 8 || i == 11 || i == 12)
+                continue;
+            sumEuler[i] = sumEuler[i] / actualFrames.Count;
+            Vector3 refEuler = referenceFrame.boneQuaternions[i].eulerAngles;
+            score += (1 - ((sumEuler[i] - refEuler).magnitude / refEuler.magnitude));
+            Debug.Log(score);
+        }
+
+        score /= (19.0f - 3.0f);
+        Debug.Log("CalculteAngleScore: " + score);
+        return score;
+    }
+
+    public float CalculateVelocityScore()
+    {
+        float score = 0.0f;
+        foreach (var recordedFrame in actualFrames)
+        {
+            // TODO: Do something with the frame
+        }
+
+        return score;
+    }
 }

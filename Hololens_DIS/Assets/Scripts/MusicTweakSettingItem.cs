@@ -5,9 +5,10 @@ using UnityEngine;
 
 public class MusicTweakSettingItem : BaseTweakSettingItem
 {
-    private void Update()
+    protected override void Update()
     {
-        buttonText.text = value.ToString();
+        base.Update();
+        buttonText.text = poseSequence.curCycles.ToString();
     }
 
     public override void Init(TweakStageController stageController, PoseSequence poseSequence)
@@ -19,24 +20,29 @@ public class MusicTweakSettingItem : BaseTweakSettingItem
         this.stageController = stageController;
         this.poseSequence = poseSequence;
 
-        this.stageController.SetSequenceBeats(poseSequence, value);
+        // curCycles = rawCycles * (2^value)
+        value = Mathf.Log(poseSequence.curCycles / poseSequence.rawCycles, 2);
 
-        offset = 0.5f;
+        this.stageController.SetSequenceBeats(poseSequence);
+
+        offset = 1.0f;
     }
 
     public override void IncrBeats()
     {
         value += offset;
-        value = Mathf.Min(value, 8);
+        poseSequence.SetCyclePower((int)value);
+        value = Mathf.Log(poseSequence.curCycles / poseSequence.rawCycles, 2);
 
-        stageController.SetSequenceBeats(poseSequence, value);
+        stageController.SetSequenceBeats(poseSequence);
     }
 
     public override void DecrBeats()
     {
         value -= offset;
-        value = Mathf.Max(offset, value);
+        poseSequence.SetCyclePower((int)value);
+        value = Mathf.Log(poseSequence.curCycles / poseSequence.rawCycles, 2);
 
-        stageController.SetSequenceBeats(poseSequence, value);
+        stageController.SetSequenceBeats(poseSequence);
     }
 }

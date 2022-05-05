@@ -15,16 +15,13 @@ public class StaminaTweakSettingItem : BaseTweakSettingItem
 
     public ButtonConfigHelper buttonConfigHelper;
 
-    public HumanoidController humanoid;
-    public float humanoidSpeed = 0.1f;
-    private float currentTimer = 0.0f;
 
-    private void Update()
+    protected override void Update()
     {
+        base.Update();
+
         buttonText.text = value.ToString();
         buttonConfigHelper.MainLabelText = isCounterMode ? "Counter" : "Timer";
-
-        Helper.UpdateHumanoidBySequence(ref currentTimer, ref poseSequence, ref humanoid);
     }
 
     public void Init(TweakStageController stageController, PoseSequence poseSequence, bool isCounterMode)
@@ -36,7 +33,7 @@ public class StaminaTweakSettingItem : BaseTweakSettingItem
         this.stageController = stageController;
         this.poseSequence = poseSequence;
 
-        this.stageController.SetSequenceBeats(poseSequence, value);
+        this.stageController.SetSequenceBeats(poseSequence);
         
         SetMode(isCounterMode);
     }

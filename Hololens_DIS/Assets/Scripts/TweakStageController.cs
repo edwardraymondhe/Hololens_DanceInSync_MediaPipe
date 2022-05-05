@@ -8,7 +8,7 @@ public class TweakStageController : BasePrepareStageController
     public GameObject staminaSettingPrefab;
     public GameObject musicSettingPrefab;
 
-    public List<TrainModeData> rhythmModeData = new List<TrainModeData>();
+    public List<RhythmSequenceData> rhythmModeData = new List<RhythmSequenceData>();
     // public Dictionary<PoseSequence, float> rhythmModeData = new Dictionary<PoseSequence, float>();
 
     public Dictionary<PoseSequence, bool> staminaModeData = new Dictionary<PoseSequence, bool>();
@@ -25,24 +25,24 @@ public class TweakStageController : BasePrepareStageController
         SpawnCollection();
     }
 
-    public void SetSequenceBeats(PoseSequence poseSequence, float value)
+    public void SetSequenceBeats(PoseSequence poseSequence)
     {
-        SetModeData(poseSequence, value);
+        SetRhythmModeData(poseSequence);
     }
 
     public void SetCounterValue(PoseSequence poseSequence, float value)
     {
-        SetModeData(counterModeData, poseSequence, value);
-        SetModeData(staminaModeData, poseSequence, true);
+        SetStaminaModeData(counterModeData, poseSequence, value);
+        SetStaminaModeData(staminaModeData, poseSequence, true);
     }
 
     public void SetTimerValue(PoseSequence poseSequence, float value)
     {
-        SetModeData(timerModeData, poseSequence, value);
-        SetModeData(staminaModeData, poseSequence, false);
+        SetStaminaModeData(timerModeData, poseSequence, value);
+        SetStaminaModeData(staminaModeData, poseSequence, false);
     }
 
-    public void SetModeData(PoseSequence poseSequence, float value)
+    public void SetRhythmModeData(PoseSequence poseSequence)
     {
         bool found = false;
         int index = 0;
@@ -57,12 +57,12 @@ public class TweakStageController : BasePrepareStageController
         }
 
         if (found)
-            rhythmModeData[index] = new TrainModeData(poseSequence, value);
+            rhythmModeData[index] = new RhythmSequenceData(poseSequence);
         else
-            rhythmModeData.Add(new TrainModeData(poseSequence, value));
+            rhythmModeData.Add(new RhythmSequenceData(poseSequence));
     }
 
-    public void SetModeData<T>(Dictionary<PoseSequence, T> dict, PoseSequence poseSequence, T value)
+    public void SetStaminaModeData<T>(Dictionary<PoseSequence, T> dict, PoseSequence poseSequence, T value)
     {
         if (dict.ContainsKey(poseSequence))
             dict[poseSequence] = value;

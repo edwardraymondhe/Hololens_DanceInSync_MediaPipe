@@ -9,7 +9,7 @@ public class PoseFrame : ScriptableBase
     /// Data structure to save angles, angular speeds corresponding to combinations of bones.
     /// </summary>
     public List<BonePair> bonePairs = new List<BonePair>();
-    public List<Quaternion> boneQuaternions = new List<Quaternion>(18);
+    public List<Quaternion> boneQuaternions = new List<Quaternion>(19);
     public List<Landmark> boneLandmarks = new List<Landmark>();
     public float duration = 0.5f;
     public bool blank = false;

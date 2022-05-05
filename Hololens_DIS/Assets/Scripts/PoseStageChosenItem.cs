@@ -10,7 +10,6 @@ public class PoseStageChosenItem : MonoBehaviour
     public TMP_Text text;
     public PoseSequence poseSequence;
     public HumanoidController humanoid;
-    public float humanoidSpeed = 0.1f;
     private float currentTimer = 0.0f;
     public void Init(PoseSequence poseSequence)
     {

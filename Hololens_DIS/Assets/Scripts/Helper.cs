@@ -418,16 +418,16 @@ public static class Helper
         return isInView;
     }
 
-    public static void UpdateHumanoidBySequence(ref float currentTimer, ref PoseSequence poseSequence, ref HumanoidController humanoid)
+    public static void UpdateHumanoidBySequence(ref float humanoidTimer, ref PoseSequence poseSequence, ref HumanoidController humanoid)
     {
-        currentTimer += Time.deltaTime * GlobalController.Instance.setting.editor.humanoidPlaySpeed;
+        humanoidTimer += Time.deltaTime * GlobalController.Instance.setting.editor.humanoidPlaySpeed;
 
-        float tmpCurrentTimer = currentTimer;
+        float tmpTimer = humanoidTimer;
         bool foundCurrentFrame = false;
         foreach (var poseFrame in poseSequence.poseFrames)
         {
             // Found the current poseFrame
-            float tmp = tmpCurrentTimer - poseFrame.duration;
+            float tmp = tmpTimer - poseFrame.duration;
             if (tmp < 0)
             {
                 humanoid.UpdateByFrame(poseFrame);
@@ -436,12 +436,15 @@ public static class Helper
             }
             else
             {
-                tmpCurrentTimer = tmp;
+                tmpTimer = tmp;
             }
         }
 
         if (!foundCurrentFrame)
-            currentTimer = -1.0f;
+        {
+            humanoid.UpdateByFrame(poseSequence.poseFrames[0]);
+            humanoidTimer = -1.0f;
+        }
     }
 
 

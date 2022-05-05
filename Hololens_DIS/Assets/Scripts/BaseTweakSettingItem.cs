@@ -17,6 +17,14 @@ public class BaseTweakSettingItem : MonoBehaviour
     protected float offset = 0.5f;
     protected TweakStageController stageController;
 
+    public HumanoidController humanoid;
+    protected float humanoidTimer = 0.0f;
+
+    protected virtual void Update()
+    {
+        Helper.UpdateHumanoidBySequence(ref humanoidTimer, ref poseSequence, ref humanoid);
+    }
+
     public virtual void Init(TweakStageController stageController, PoseSequence poseSequence)
     {
     }

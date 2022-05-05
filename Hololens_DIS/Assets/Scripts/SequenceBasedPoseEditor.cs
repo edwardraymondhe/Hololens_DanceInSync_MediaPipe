@@ -392,7 +392,10 @@ public class SequenceBasedPoseEditor: PoseEditor
 
     public override void SaveEdit()
     {
-        SaveInstance(PoseSequence.Concat(edittingPoseSequences));
+        if (edittingPoseSequences.Count > 1)
+            SaveInstance(PoseSequence.Concat(edittingPoseSequences));
+        else if (edittingPoseSequences.Count == 1)
+            SaveInstance(edittingPoseSequences[0]);
 
         base.SaveEdit();
     }
