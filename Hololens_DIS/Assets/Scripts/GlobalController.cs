@@ -30,7 +30,11 @@ public class Setting
 #endif
         }
     }
+
     public float processFPS = 30.0f;
+    public bool mockMocap = false;
+    public Vector3 mockMocapOffset = new Vector3(3, 3, 3);
+    public float mocapScore = 10.0f;
 
     public Editor editor = new Editor();
 }
@@ -68,9 +72,10 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     public void SetStage(int idx)
     {
         bool acrossStage = false;
-        if ((stage < 0)|| (stage >= 0 && stage <= 3 && idx > 3) || (idx >= 0 && idx <= 3 && stage > 3))
+        if ((stage < 0) || (stage >= 0 && stage <= 3 && idx > 3) || (idx >= 0 && idx <= 3 && stage > 3))
             acrossStage = true;
 
+        Debug.Log(string.Format("Setting stage: {0} -> {1}", stage, idx));
         stage = idx;
 
         switch (stage)
@@ -107,7 +112,9 @@ public class GlobalController : GlobalSingleTon<GlobalController>
                 }
                 else
                 {
-                    // TODO: Stamina Mode
+                    var trainStage = SetTrainStage<StaminaTrainStageController>();
+                    trainStage.InitStage();
+                    trainStage.StartStage();
                 }
 
                 // TODO: Sets corresponding near menu buttons
@@ -126,6 +133,9 @@ public class GlobalController : GlobalSingleTon<GlobalController>
                 }
                 else
                 {
+                    var review_train = GetTrainStage<StaminaTrainStageController>();
+                    var reviewStage = SetReviewStage<StaminaReviewStageController>();
+                    reviewStage.InitStage(review_train);
                     // TODO: Stamina Mode
                 }
 
@@ -142,19 +152,19 @@ public class GlobalController : GlobalSingleTon<GlobalController>
     }
     public void PrevStage()
     {
-        stage--;
-        if (stage < 0)
+        int targetStage = stage - 1;
+        if (targetStage < 0)
             return;
 
-        SetStage(stage);
+        SetStage(targetStage);
     }
     public void NextStage()
     {
-        stage++;
-        if (stage > 5)
+        int targetStage = stage + 1;
+        if (targetStage > 5)
             return;
 
-        SetStage(stage);
+        SetStage(targetStage);
     }
     #endregion
 

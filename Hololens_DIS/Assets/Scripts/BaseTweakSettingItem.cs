@@ -12,8 +12,10 @@ public class BaseTweakSettingItem : MonoBehaviour
 
     public TMP_Text buttonText;
     public TMP_Text unitText;
-
+    
+    [SerializeField]
     protected float value = 1;
+    [SerializeField]
     protected float offset = 0.5f;
     protected TweakStageController stageController;
 

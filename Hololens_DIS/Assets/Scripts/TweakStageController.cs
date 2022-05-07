@@ -32,12 +32,14 @@ public class TweakStageController : BasePrepareStageController
 
     public void SetCounterValue(PoseSequence poseSequence, float value)
     {
+        Debug.Log("Counter count: " + counterModeData.Count);
         SetStaminaModeData(counterModeData, poseSequence, value);
         SetStaminaModeData(staminaModeData, poseSequence, true);
     }
 
     public void SetTimerValue(PoseSequence poseSequence, float value)
     {
+        Debug.Log("Timer count: " + timerModeData.Count);
         SetStaminaModeData(timerModeData, poseSequence, value);
         SetStaminaModeData(staminaModeData, poseSequence, false);
     }

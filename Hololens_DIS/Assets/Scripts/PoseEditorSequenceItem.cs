@@ -50,7 +50,7 @@ public class PoseEditorSequenceItem : PoseEditorItem
         
         this.poseEditor = poseEditor;
         this.poseSequence = poseSequence;
-        this.originalDuration = poseSequence.GetDuration();
+        this.originalDuration = poseSequence.GetTotalDuration();
         this.widthPerSecond = widthPerSecond;
         GetComponentInChildren<Text>().text = poseSequence.fileName + "\n" + poseSequence.curCycles;
 
@@ -130,7 +130,7 @@ public class PoseEditorSequenceItem : PoseEditorItem
         this.widthPerSecond = widthPerSecond;
 
         // Sets all params
-        Vector2 targetDelta = new Vector2(this.widthPerSecond * poseSequence.GetDuration(), rectTransform.sizeDelta.y);
+        Vector2 targetDelta = new Vector2(this.widthPerSecond * poseSequence.GetTotalDuration(), rectTransform.sizeDelta.y);
         rectTransform.sizeDelta = targetDelta;
 
         originalWidth = this.widthPerSecond * originalDuration;

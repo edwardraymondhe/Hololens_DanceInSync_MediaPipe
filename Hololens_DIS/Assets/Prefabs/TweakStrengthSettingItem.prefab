@@ -1614,14 +1614,13 @@ MonoBehaviour:
   itemText: {fileID: 1582841769881117993}
   buttonText: {fileID: 1582841769629929230}
   unitText: {fileID: 2829568073237529818}
+  humanoid: {fileID: 2137785599931069732}
   timer: 10
   timerOffset: 10
   counter: 2
   counterOffset: 0.5
   isCounterMode: 0
   buttonConfigHelper: {fileID: 1481013726594667217}
-  humanoid: {fileID: 2137785599931069732}
-  humanoidSpeed: 0.1
 --- !u!1 &2196810265901604098
 GameObject:
   m_ObjectHideFlags: 0

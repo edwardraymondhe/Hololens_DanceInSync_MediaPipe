@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RhythmTrainStageController : BaseTrainStageController
 {
-    public List<RhythmSequenceData> rhythmSequenceLengths = new List<RhythmSequenceData>();
+    public List<RhythmSequenceData> rhythmSequenceDatas = new List<RhythmSequenceData>();
     [SerializeField]
     private float processedTimer = 0.0f;
     [SerializeField]
@@ -17,15 +17,8 @@ public class RhythmTrainStageController : BaseTrainStageController
     RhythmSequenceData lastSequence, currSequence, nextSequence;
     [SerializeField]
     PoseFrame lastFrame, currFrame, nextFrame;
-
     [SerializeField]
     private bool isEightBeatCountDown = false;
-    [SerializeField]
-    private bool isStageOver = false;
-
-    public HumanoidController trainHumanoid;
-
-    private Dictionary<PoseFrame, List<PoseFrame>> rhythmFrameRecords = new Dictionary<PoseFrame, List<PoseFrame>>();
 
     public override void StartStage()
     {
@@ -38,12 +31,12 @@ public class RhythmTrainStageController : BaseTrainStageController
         {
             var poseSequenceDeepCopy = Helper.DeepCopy(keyValuePair.poseSequence);
             var poseSequenceLength = musicStage.chosenEightBeatDuration * keyValuePair.poseSequence.curCycles;
-            poseSequenceDeepCopy.SetDuration(poseSequenceLength);
+            poseSequenceDeepCopy.SetTotalDuration(poseSequenceLength);
 
-            rhythmSequenceLengths.Add(new RhythmSequenceData(poseSequenceDeepCopy));
+            rhythmSequenceDatas.Add(new RhythmSequenceData(poseSequenceDeepCopy));
         }
 
-        foreach (var rhythmSequenceLength in rhythmSequenceLengths)
+        foreach (var rhythmSequenceLength in rhythmSequenceDatas)
             rhythmSequenceLength.InitScore(musicStage.chosenEightBeatDuration);
 
         // Manually start the music stage
@@ -68,7 +61,7 @@ public class RhythmTrainStageController : BaseTrainStageController
         nextFrame = null;
         isEightBeatCountDown = false;
         isStageOver = false;
-        rhythmSequenceLengths.Clear();
+        rhythmSequenceDatas.Clear();
     }
 
     protected override void Update()
@@ -79,7 +72,7 @@ public class RhythmTrainStageController : BaseTrainStageController
         if (isStageOver)
         {
             // TODO: Music fade out a little bit
-            foreach (var rhythmSequenceLength in rhythmSequenceLengths)
+            foreach (var rhythmSequenceLength in rhythmSequenceDatas)
                 rhythmSequenceLength.CalculateScore();
 
             GlobalController.Instance.NextStage();
@@ -140,10 +133,10 @@ public class RhythmTrainStageController : BaseTrainStageController
         bool isLastSequence = false;
         float trainedTimerTmp = trainedTimer;
         int seqIndex = -1;
-        foreach (var keyValuePair in rhythmSequenceLengths)
+        foreach (var keyValuePair in rhythmSequenceDatas)
         {
             seqIndex++;
-            if (seqIndex == rhythmSequenceLengths.Count - 1)
+            if (seqIndex == rhythmSequenceDatas.Count - 1)
                 isLastSequence = true;
 
             // Decrease the timer by seq's duration if the seq is done, then go for the next seq; else found the in-progress seq, and find frames
@@ -183,8 +176,8 @@ public class RhythmTrainStageController : BaseTrainStageController
                 */
 
                 currSequence = keyValuePair;
-                if (seqIndex < rhythmSequenceLengths.Count - 1)
-                    nextSequence = rhythmSequenceLengths[seqIndex + 1];
+                if (seqIndex < rhythmSequenceDatas.Count - 1)
+                    nextSequence = rhythmSequenceDatas[seqIndex + 1];
                 else
                     nextSequence = null;
 

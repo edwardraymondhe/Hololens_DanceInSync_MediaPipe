@@ -138,7 +138,6 @@ public class MediaPipeServer: MonoBehaviour
         catch (JsonReaderException)
         {
             Debug.Log("Json Reader Error.");
-            throw;
         }
         
 

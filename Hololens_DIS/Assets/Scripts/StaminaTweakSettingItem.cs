@@ -6,11 +6,11 @@ using Microsoft.MixedReality.Toolkit.UI;
 
 public class StaminaTweakSettingItem : BaseTweakSettingItem
 {
-    public float timer = 10.0f;
+    public float timer = 30.0f;
     public float timerOffset = 10.0f;
     
     public float counter = 2.0f;
-    public float counterOffset = 0.5f;
+    public float counterOffset = 1.0f;
     public bool isCounterMode = true;
 
     public ButtonConfigHelper buttonConfigHelper;
@@ -21,7 +21,7 @@ public class StaminaTweakSettingItem : BaseTweakSettingItem
         base.Update();
 
         buttonText.text = value.ToString();
-        buttonConfigHelper.MainLabelText = isCounterMode ? "Counter" : "Timer";
+        buttonConfigHelper.MainLabelText = isCounterMode ? "组" : "秒";
     }
 
     public void Init(TweakStageController stageController, PoseSequence poseSequence, bool isCounterMode)
@@ -35,6 +35,8 @@ public class StaminaTweakSettingItem : BaseTweakSettingItem
 
         this.stageController.SetSequenceBeats(poseSequence);
         
+        // Sets the opposite value, so that default values could be saved
+        value = isCounterMode ? timer : counter;
         SetMode(isCounterMode);
     }
 
@@ -52,7 +54,9 @@ public class StaminaTweakSettingItem : BaseTweakSettingItem
             value = counter;
             offset = counterOffset;
 
-            unitText.text = "Sec";
+            unitText.text = "Group";
+
+            stageController.SetCounterValue(poseSequence, value);
         }
         else
         {
@@ -61,23 +65,29 @@ public class StaminaTweakSettingItem : BaseTweakSettingItem
             value = timer;
             offset = timerOffset;
 
-            unitText.text = "Group";
+            unitText.text = "Sec";
+
+            stageController.SetTimerValue(poseSequence, value);
         }
-        
+
         this.isCounterMode = isCounterMode;
     }
 
     public override void IncrBeats()
     {
-        value += offset;
-
+        float targetValue = value + offset;
+        Debug.Log(string.Format("Value: {0} -> {1}", value, targetValue));
+        value = targetValue;
         SetModeValue();
     }
 
     public override void DecrBeats()
     {
-        value -= offset;
-        value = Mathf.Max(offset, value);
+        float targetValue = value - offset;
+        targetValue = Mathf.Max(offset, targetValue);
+
+        Debug.Log(string.Format("Value: {0} -> {1}", value, targetValue));
+        value = targetValue;
 
         SetModeValue();
     }

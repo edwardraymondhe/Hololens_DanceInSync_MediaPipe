@@ -418,6 +418,51 @@ public static class Helper
         return isInView;
     }
 
+    public static float CalculateAngleScore(List<Vector3> refEulers, List<Vector3> selfEulers)
+    {
+        float score = 0.0f;
+        for (int i = 0; i < refEulers.Count - 1; i++)
+        {
+            if (i == 8 || i == 11 || i == 12)
+                continue;
+
+            Vector3 refEuler = Vector3.zero;
+            if (GlobalController.Instance.setting.mockMocap == false)
+                refEuler = refEulers[i];
+            else
+                refEuler = selfEulers[i] + GlobalController.Instance.setting.mockMocapOffset;
+
+            score += (1 - Mathf.Abs((selfEulers[i] - refEuler).magnitude / refEuler.magnitude));
+        }
+        Debug.Log("Score: " + score);
+        return score;
+    }
+    public static float CalculateAngleScore(PoseFrame refFrame, PoseFrame selfFrame)
+    {
+        return CalculateAngleScore(refFrame.boneQuaternions, selfFrame.boneQuaternions);
+    }
+    public static float CalculateAngleScore(List<Quaternion> refEulers, List<Vector3> selfEulers)
+    {
+        return CalculateAngleScore(QuatsToVecs(refEulers), selfEulers);
+    }
+    public static float CalculateAngleScore(List<Quaternion> refEulers, List<Quaternion> selfEulers)
+    {
+        return CalculateAngleScore(QuatsToVecs(refEulers), QuatsToVecs(selfEulers));
+    }
+    public static float CalculateAngleScore(List<Vector3> refEulers, List<Quaternion> selfEulers)
+    {
+        return CalculateAngleScore(refEulers, QuatsToVecs(selfEulers));
+    }
+
+    public static List<Vector3> QuatsToVecs(List<Quaternion> quats)
+    {
+        List<Vector3> vecs = new List<Vector3>();
+        foreach (var quat in quats)
+            vecs.Add(quat.eulerAngles);
+        
+        return vecs;
+    }
+
     public static void UpdateHumanoidBySequence(ref float humanoidTimer, ref PoseSequence poseSequence, ref HumanoidController humanoid)
     {
         humanoidTimer += Time.deltaTime * GlobalController.Instance.setting.editor.humanoidPlaySpeed;

@@ -2,23 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RhythmReviewStageController : BaseReviewStageController
+public class StaminaReviewStageController : BaseReviewStageController
 {
-    private RhythmTrainStageController rhythmStageController;
-
+    private StaminaTrainStageController staminaStageController;
     private void Start()
     {
-        
+
     }
 
     private void Update()
     {
-        
-    }
 
+    }
     public override void InitStage<T>(T trainStageController)
     {
-        rhythmStageController = trainStageController as RhythmTrainStageController;
+        staminaStageController = trainStageController as StaminaTrainStageController;
     }
 
     public override void SaveRecord()

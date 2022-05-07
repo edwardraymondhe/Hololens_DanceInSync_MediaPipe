@@ -5,6 +5,8 @@ using RhythmTool.Examples;
 
 public abstract class BaseTrainStageController : MonoBehaviour
 {
+    [SerializeField] 
+    protected HumanoidController trainHumanoid;
     [SerializeField]
     protected AudioClipSelector audioClipSelector;
     [SerializeField]
@@ -19,6 +21,8 @@ public abstract class BaseTrainStageController : MonoBehaviour
     protected float time = 0.0f;
     [SerializeField]
     protected bool initialized = false;
+    [SerializeField]
+    protected bool isStageOver = false;
 
     protected virtual void Update()
     {

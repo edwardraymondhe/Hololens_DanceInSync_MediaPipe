@@ -126,7 +126,7 @@ public class SequenceBasedPoseEditor: PoseEditor
         foreach (var sequence in edittingPoseSequences)
         {
             float newDuration = sequence.curCycles * GlobalController.Instance.setting.editor.cycleDuration;
-            sequence.SetDuration(newDuration);
+            sequence.SetTotalDuration(newDuration);
         }
 
         UpdatePoseEditorTimelineScaleAndPosition();
@@ -164,14 +164,14 @@ public class SequenceBasedPoseEditor: PoseEditor
                     currentItem = item;
                     currentSequenceFound = true;
                     var percentage = (inputPosition - points[0].x) / (points[2].x - points[0].x);
-                    totalTime += (comp.poseSequence.GetDuration() * percentage);
+                    totalTime += (comp.poseSequence.GetTotalDuration() * percentage);
                 }
                 else
                 {
                     if (i == 0 && inputPosition <= points[0].x)
                         break;
 
-                    totalTime += comp.poseSequence.GetDuration();
+                    totalTime += comp.poseSequence.GetTotalDuration();
                 }
             }
         }
@@ -200,7 +200,7 @@ public class SequenceBasedPoseEditor: PoseEditor
 
             if (currentItemFound == false)
             {
-                totalTime += comp.poseSequence.GetDuration();
+                totalTime += comp.poseSequence.GetTotalDuration();
                 if (totalTime < currentEditorTime)
                     lastItem = item;
                 else // Iterating frame is the next frame
@@ -222,7 +222,7 @@ public class SequenceBasedPoseEditor: PoseEditor
             Vector3 lastItemCenter = lastItemPoints[1];
             
             var currentEditorSequenceitem = currentItem.GetComponent<PoseEditorSequenceItem>();
-            var currentDuration = currentEditorSequenceitem.poseSequence.GetDuration();
+            var currentDuration = currentEditorSequenceitem.poseSequence.GetTotalDuration();
 
             currentEditorSequenceitem.highlightUI.SetActive(true);
 
